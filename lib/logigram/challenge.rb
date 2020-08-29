@@ -6,9 +6,6 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     attr_reader :clues
 
-    # @return [Array<Logigram::Premise>]
-    attr_reader :extras
-
     # @param puzzle [Logigram::Puzzle]
     def initialize puzzle
       @premises = puzzle.premises.clone
@@ -43,7 +40,6 @@ module Logigram
         implicate(p, false)
       end
       @clues = [@clues[0]] + clues[1..-1].shuffle
-      @extras = @premises.clone.shuffle
     end
 
     private
