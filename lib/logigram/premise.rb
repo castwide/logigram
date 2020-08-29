@@ -1,5 +1,8 @@
 module Logigram
-  # Puzzles use premises to provide clues. Examples of premises:
+  # Puzzles use premises to provide clues.
+  #
+  # Examples of premises:
+  #
   #   "Bob is short."
   #   "Mary is not tall."
   #   "The short person has red hair."

@@ -9,6 +9,9 @@ module Logigram
     # @return [Array<Logigram::Constraint>]
     attr_reader :constraints
 
+    # @param object [Object]
+    # @param puzzle [Logigram::Base]
+    # @param name [String, nil]
     def initialize object, puzzle, name: nil
       @object = object
       @name = name || object.to_s
@@ -21,10 +24,14 @@ module Logigram
 
     # Get the value assigned to this piece for the specified term.
     #
-    def value key
-      @terms[key]
+    # @param term [String] The name of a constraint
+    def value term
+      @terms[term]
     end
 
+    # The names of all the constraints associated with this piece.
+    #
+    # @return [Array<String>]
     def terms
       @terms.keys
     end
