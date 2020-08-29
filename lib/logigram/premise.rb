@@ -1,5 +1,6 @@
 module Logigram
-  # Puzzles use premises to provide clues.
+  # A premise is a fact about a puzzle piece. Puzzles use premises to provide
+  # clues.
   #
   # Examples of premises:
   #
@@ -61,9 +62,9 @@ module Logigram
     end
 
     # The subject is the puzzle piece for which this premise provides a fact.
-    # If the premise is `specific`, the subject is typically the piece's name.
-    # Otherwise, the subject is a description of the piece based on the
-    # constraint being used as an identifier.
+    # If the premise is `specific`, the subject is the piece's name. Otherwise
+    # the subject is a description of the piece based on the constraint being
+    # used as an `identifier`.
     #
     # Example: The premise's piece is named Bob. The puzzle's constraints
     # include hair color. Bob's hair is red. If this premise is specific, the
@@ -72,14 +73,11 @@ module Logigram
     #
     # @return [String]
     def subject
-      if @subject.nil?
-        if identifier.nil?
-          @subject = piece.name
-        else
-          @subject = identifier.subject(piece.value(identifier.name))
-        end
+      @subject ||= if identifier.nil?
+        piece.name
+      else
+        identifier.subject(piece.value(identifier.name))
       end
-      @subject
     end
 
     # A human-readable representation of the premise, e.g., "The dog is red."
