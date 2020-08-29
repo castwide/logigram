@@ -1,7 +1,7 @@
 RSpec.describe Logigram::Base do
   it 'accepts constraints' do
     klass = Class.new(Logigram::Base) do
-      constrain 'color', 'red', 'green', 'blue'
+      constrain 'color', ['red', 'green', 'blue']
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['the dog', 'the cat', 'the pig'])

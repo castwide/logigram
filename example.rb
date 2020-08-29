@@ -2,8 +2,8 @@ require 'bundler/setup'
 require 'logigram'
 
 class SimplePuzzle < Logigram::Base
-  constrain 'color', 'red', 'green', 'blue', subject: 'the %{value} animal'
-  constrain 'size', 'small', 'medium', 'large', subject: 'the %{value} animal'
+  constrain 'color', ['red', 'green', 'blue'], subject: 'the %{value} animal'
+  constrain 'size', ['small', 'medium', 'large'], subject: 'the %{value} animal'
 end
 
 puzzle = SimplePuzzle.new(['the dog', 'the cat', 'the pig'])

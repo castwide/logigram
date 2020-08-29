@@ -4,8 +4,8 @@ module Logigram
   #
   # @example
   #   class Puzzle < Logigram::Base
-  #     constrain 'color', 'red', 'green', 'blue', subject: 'the %{value} thing'
-  #     constrain 'size', 'small', 'medium', 'large', subject: 'the %{value} thing'
+  #     constrain 'color', ['red', 'green', 'blue'], subject: 'the %{value} thing'
+  #     constrain 'size', ['small', 'medium', 'large'], subject: 'the %{value} thing'
   #   end
   #
   class Base
@@ -30,13 +30,18 @@ module Logigram
       # unique color and size.
       #
       #   class MyPuzzle < Logigram::Base
-      #     constrain 'color', 'red', 'green', 'blue'
-      #     constrain 'size', 'small', 'medium', 'large'
+      #     constrain 'color', ['red', 'green', 'blue']
+      #     constrain 'size', ['small', 'medium', 'large']
       #   end
       #   puzzle = MyPuzzle.new ['dog', 'cat', 'rat']
       #
+      # @param name [String]
+      # @param values [Array<String>]
+      # @param subject [String, nil]
+      # @param predicate [String, nil]
+      # @param negative [String, nil]
       # @return [Logigram::Constraint] The newly created constraint
-      def constrain name, *values, subject: nil, predicate: nil, negative: nil
+      def constrain name, values, subject: nil, predicate: nil, negative: nil
         f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative)
         constraints[name] = f
         f
