@@ -1,4 +1,7 @@
 require "bundler/setup"
+require 'simplecov'
+SimpleCov.start
+
 require "logigram"
 
 RSpec.configure do |config|
