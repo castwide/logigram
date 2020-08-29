@@ -46,5 +46,25 @@ RSpec.describe Logigram::Base do
         klass.new(['dog', 'cat'])
       }.to raise_error(RuntimeError)
     end
+
+    it 'selects a solution predicate' do
+      klass = Class.new(Logigram::Base) do
+        constrain 'color', ['red']
+      end
+      # @type [Logigram::Base]
+      puzzle = klass.new(['dog'])
+      expect(puzzle.solution_term).to eq('color')
+      expect(puzzle.solution_predicate).to eq('is red')
+    end
+
+    it 'sets a random solution term' do
+      klass = Class.new(Logigram::Base) do
+        constrain 'color', ['red']
+        constrain 'size', ['small']
+      end
+      # @type [Logigram::Base]
+      puzzle = klass.new(['dog'])
+      expect(['color', 'size']).to include(puzzle.solution_term)
+    end
   end
 end
