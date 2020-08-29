@@ -9,7 +9,7 @@ module Logigram
   #   end
   #
   class Base
-    attr_reader :pieces, :premises
+    attr_reader :pieces
 
     class << self
       # A hash of the puzzle's constraints.
@@ -61,8 +61,11 @@ module Logigram
 
       @solution ||= @pieces.sample
       @solution_term = term || @picks.keys.sample
+    end
 
-      @premises = generate_all_premises
+    # @return [Array<Premise>]
+    def premises
+      @premises ||= generate_all_premises
     end
 
     # @return [Array<Constraint>]
