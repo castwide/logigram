@@ -3,23 +3,14 @@ module Logigram
     # @return [Object]
     attr_reader :object
 
-    # @return [String]
-    attr_reader :name
-
-    # @return [Array<Logigram::Constraint>]
-    attr_reader :constraints
-
-    # @param object [Object]
-    # @param puzzle [Logigram::Base]
-    # @param name [String, nil]
-    def initialize object, puzzle, name: nil
+    def initialize object, terms, name: nil
       @object = object
-      @name = name || object.to_s
-      @constraints = puzzle.constraints.values
-      @terms = {}
-      puzzle.terms.each do |k|
-        @terms[k] = puzzle.pick(k)
-      end
+      @terms = terms
+      @name = name
+    end
+
+    def name
+      @name || object.to_s
     end
 
     # Get the value assigned to this piece for the specified term.

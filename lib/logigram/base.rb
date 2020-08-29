@@ -65,6 +65,7 @@ module Logigram
       @premises = generate_all_premises
     end
 
+    # @return [Array<Constraint>]
     def constraints
       self.class.constraints
     end
@@ -137,9 +138,14 @@ module Logigram
 
     # Add a piece to the puzzle.
     #
+    # @param object [#to_s]
     # @return [Logigram::Piece] The newly created piece.
     def insert object
-      p = Piece.new(object, self)
+      terms = {}
+      constraints.values.each do |c|
+        terms[c.name] = pick(c.name)
+      end
+      p = Piece.new(object, terms)
       @object_pieces[object] = p
       @pieces.push p
       p
