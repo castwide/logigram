@@ -12,9 +12,9 @@ module Logigram
     # @param subject [String, nil]
     # @param predicate [String, nil]
     # @param negative [String, nil]
-    def initialize name, *values, subject: nil, predicate: nil, negative: nil
+    def initialize name, values, subject: nil, predicate: nil, negative: nil
       @name = name
-      @values = values.flatten
+      @values = values
       @subject = subject || 'the %{value} thing'
       @predicate = predicate || 'is %{value}'
       @negative = negative || 'is not %{value}'
