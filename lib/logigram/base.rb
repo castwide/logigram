@@ -94,7 +94,6 @@ module Logigram
     def solution
       @solution
     end
-    alias solution_piece solution
 
     # The term that should be used to identify the solution.
     #

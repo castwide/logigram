@@ -5,6 +5,7 @@ module Logigram
   class Challenge
     # @return [Array<Logigram::Premise>]
     attr_reader :clues
+
     # @return [Array<Logigram::Premise>]
     attr_reader :extras
 
@@ -16,7 +17,7 @@ module Logigram
 
       # Eliminate the premise that would solve the puzzle with one clue, e.g.,
       # if the solution has red hair, eliminate "Bob has red hair."
-      eliminate piece: @puzzle.solution_piece, term: @puzzle.solution_term, affirmative: true, specific: true
+      eliminate piece: @puzzle.solution, term: @puzzle.solution_term, affirmative: true, specific: true
       # Higher difficulty
       eliminate term: @puzzle.solution_term, affirmative: true, specific: true
       # Even higher (generic premises that reveal the solution constraint with a generic subject)
