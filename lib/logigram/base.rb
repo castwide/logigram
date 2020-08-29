@@ -2,6 +2,12 @@ module Logigram
   # A base class for creating logic puzzles. Authors should not instantiate
   # this class directly, but extend it with their own puzzle implementations.
   #
+  # @example
+  #   class Puzzle < Logigram::Base
+  #     constrain 'color', 'red', 'green', 'blue', subject: 'the %{value} thing'
+  #     constrain 'size', 'small', 'medium', 'large', subject: 'the %{value} thing'
+  #   end
+  #
   class Base
     attr_reader :pieces, :premises
 
@@ -31,7 +37,7 @@ module Logigram
       #
       # @return [Logigram::Constraint] The newly created constraint
       def constrain name, *values, subject: nil, predicate: nil, negative: nil
-        f = Constraint.new(name, *values, subject: subject, predicate: predicate, negative: negative)
+        f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative)
         constraints[name] = f
         f
       end
@@ -45,10 +51,10 @@ module Logigram
       @pieces = []
       objects.each do |p|
         r = insert(p)
-        @solution_piece = r if p ==solution
+        @solution = r if p == solution
       end
 
-      @solution_piece ||= @pieces.sample
+      @solution ||= @pieces.sample
       @solution_term = term || @picks.keys.sample
 
       @premises = generate_all_premises
@@ -58,6 +64,9 @@ module Logigram
       self.class.constraints
     end
 
+    # Names of constraints
+    #
+    # @return [Array<String>]
     def terms
       self.class.constraints.keys
     end
@@ -72,20 +81,14 @@ module Logigram
       self.class.constraints[key].values & result
     end
 
-    # Alias for solution_piece.
-    #
-    # @return [Logigram::Piece]
-    def solution
-      @solution_piece
-    end
-
     # The piece that represents the solution. The puzzle's premises should be
     # clues from which this solution can be deduced.
     #
     # @return [Logigram::Piece]
-    def solution_piece
-      @solution_piece
+    def solution
+      @solution
     end
+    alias solution_piece solution
 
     # The term that should be used to identify the solution.
     #
@@ -98,20 +101,20 @@ module Logigram
     #
     # @return [String]
     def solution_value
-      @solution_piece.value(@solution_term)
+      @solution.value(@solution_term)
     end
 
     # Shortcut to get the solution facet's predicate, e.g., "is red"
     #
     # @return [String]
     def solution_predicate
-      self.class.constraints[@solution_term].predicate(@solution_piece.value(@solution_term))
+      self.class.constraints[@solution_term].predicate(@solution.value(@solution_term))
     end
 
     # Select an unused value for a term.
     #
     def pick key
-      raise 'Term not set' unless self.class.constraints.include?(key)
+      raise ArgumentError, 'Term not set' unless self.class.constraints.include?(key)
       raise "Not enough values in #{key} term" if @picks[key].empty?
       picked = @picks[key].sample
       @picks[key].delete picked

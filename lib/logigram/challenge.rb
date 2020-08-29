@@ -8,6 +8,7 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     attr_reader :extras
 
+    # @param puzzle [Logigram::Puzzle]
     def initialize puzzle
       @puzzle = puzzle
       @premises = @puzzle.premises.clone
@@ -16,18 +17,24 @@ module Logigram
       # Eliminate the premise that would solve the puzzle with one clue, e.g.,
       # if the solution has red hair, eliminate "Bob has red hair."
       eliminate piece: @puzzle.solution_piece, term: @puzzle.solution_term, affirmative: true, specific: true
-      eliminate term: @puzzle.solution_term, affirmative: true, specific: true # Higher difficulty
-      eliminate term: @puzzle.solution_term, affirmative: true, specific: false # Even higher (generic premises that reveal the solution constraint with a generic subject)
-      eliminate term: @puzzle.solution_term, affirmative: false, specific: true, value: @puzzle.solution.value(@puzzle.solution_term) # Specific negative premises about the solution facet
+      # Higher difficulty
+      eliminate term: @puzzle.solution_term, affirmative: true, specific: true
+      # Even higher (generic premises that reveal the solution constraint with a generic subject)
+      eliminate term: @puzzle.solution_term, affirmative: true, specific: false
+      # Specific negative premises about the solution facet
+      eliminate term: @puzzle.solution_term, affirmative: false, specific: true, value: @puzzle.solution.value(@puzzle.solution_term)
       (@puzzle.pieces - [@puzzle.pieces.sample]).each do |p|
         specify(p)
       end
-      eliminate affirmative: true, specific: true # Eliminate all remaining specific true premises
+      # Eliminate all remaining specific true premises
+      eliminate affirmative: true, specific: true
       @puzzle.pieces.each do |p|
         specify(p, false)
       end
-      eliminate term: @puzzle.solution_term, affirmative: true, specific: false # Eliminate affirmative generic premises about the solution facet
-      eliminate piece: @puzzle.solution, specific: false # Eliminate all generic premises about the solution piece
+      # Eliminate affirmative generic premises about the solution facet
+      eliminate term: @puzzle.solution_term, affirmative: true, specific: false
+      # Eliminate all generic premises about the solution piece
+      eliminate piece: @puzzle.solution, specific: false
       @puzzle.pieces.each do |p|
         implicate(p, true)
       end
@@ -63,7 +70,8 @@ module Logigram
       return if result.nil?
       @premises.delete result
       eliminate piece: piece, term: result.term, affirmative: true, specific: true
-      eliminate piece: piece, term: result.term, specific: false if affirmative # Remove generic premises that match affirmative premise
+      # Remove generic premises that match affirmative premise
+      eliminate piece: piece, term: result.term, specific: false if affirmative
       @clues.push result
     end
 

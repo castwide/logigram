@@ -1,3 +1,4 @@
+require 'bundler/setup'
 require 'logigram'
 
 class SimplePuzzle < Logigram::Base
