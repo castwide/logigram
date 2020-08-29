@@ -11,35 +11,34 @@ module Logigram
 
     # @param puzzle [Logigram::Puzzle]
     def initialize puzzle
-      @puzzle = puzzle
-      @premises = @puzzle.premises.clone
+      @premises = puzzle.premises.clone
       @clues = []
 
       # Eliminate the premise that would solve the puzzle with one clue, e.g.,
       # if the solution has red hair, eliminate "Bob has red hair."
-      eliminate piece: @puzzle.solution, term: @puzzle.solution_term, affirmative: true, specific: true
+      eliminate piece: puzzle.solution, term: puzzle.solution_term, affirmative: true, specific: true
       # Higher difficulty
-      eliminate term: @puzzle.solution_term, affirmative: true, specific: true
+      eliminate term: puzzle.solution_term, affirmative: true, specific: true
       # Even higher (generic premises that reveal the solution constraint with a generic subject)
-      eliminate term: @puzzle.solution_term, affirmative: true, specific: false
+      eliminate term: puzzle.solution_term, affirmative: true, specific: false
       # Specific negative premises about the solution facet
-      eliminate term: @puzzle.solution_term, affirmative: false, specific: true, value: @puzzle.solution.value(@puzzle.solution_term)
-      (@puzzle.pieces - [@puzzle.pieces.sample]).each do |p|
+      eliminate term: puzzle.solution_term, affirmative: false, specific: true, value: puzzle.solution.value(puzzle.solution_term)
+      (puzzle.pieces - [puzzle.pieces.sample]).each do |p|
         specify(p)
       end
       # Eliminate all remaining specific true premises
       eliminate affirmative: true, specific: true
-      @puzzle.pieces.each do |p|
+      puzzle.pieces.each do |p|
         specify(p, false)
       end
       # Eliminate affirmative generic premises about the solution facet
-      eliminate term: @puzzle.solution_term, affirmative: true, specific: false
+      eliminate term: puzzle.solution_term, affirmative: true, specific: false
       # Eliminate all generic premises about the solution piece
-      eliminate piece: @puzzle.solution, specific: false
-      @puzzle.pieces.each do |p|
+      eliminate piece: puzzle.solution, specific: false
+      puzzle.pieces.each do |p|
         implicate(p, true)
       end
-      @puzzle.pieces.each do |p|
+      puzzle.pieces.each do |p|
         implicate(p, false)
         implicate(p, false)
       end
