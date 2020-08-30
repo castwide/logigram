@@ -8,80 +8,56 @@ module Logigram
 
     # @param puzzle [Logigram::Base]
     def initialize puzzle
-      temp puzzle
-    end
-
-    def temp puzzle
       @puzzle = puzzle
-      clues = []
-
-      terms = (all_terms - [puzzle.solution_term])
-      pieces = all_pieces
-      # One piece doesn't get a specific affirmative
-      other = pieces.pop
-
-      used_terms = []
-
-      (pieces - [other]).each do |piece|
-        # specific affirmative
-        terms = (all_terms - [puzzle.solution_term]) if terms.empty?
-        term = terms.pop
-        used_terms.push term
-        clues.push Logigram::Premise.new(piece, puzzle.constraints[term], piece.value(term))
-      end
-      # Rest are specific negative
-      [other].each do |piece|
-        # terms = all_terms if terms.empty?
-        term = terms.pop
-        term = puzzle.solution_term if term.nil?
-        # herr = (pieces - [piece, puzzle.solution]).shuffle.first
-        herr = pieces.shuffle.first
-        clues.push Logigram::Premise.new(other, puzzle.constraints[term], herr.value(term))
-      end
-
-      if puzzle.terms.length > 2
-        pieces = all_pieces
-        (puzzle.terms - [puzzle.solution_term]).each do |term|
-          pieces = all_pieces if pieces.empty?
-          piece = pieces.pop
-          ident = (puzzle.terms - [term]).shuffle.pop
-          clues.push Logigram::Premise.new(piece, puzzle.constraints[term], piece.value(term), puzzle.constraints[ident])
+      @premises = []
+      reductions = []
+      previous = nil
+      result = []
+      used = []
+      @sorted = @puzzle.constraints.values.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
+      @sorted.each_with_index do |constraint, idx|
+        here = generate_premises(constraint, reductions, previous, used)
+        # reductions = here
+        used.clear
+        result.concat here
+        unless @sorted.last == constraint
+          here, _ = generate_premise(@puzzle.pieces.last, @sorted[idx + 1], constraint, [@puzzle.pieces.last], here.map { |pr| pr.value })
+          result.push here
+          reductions.push here
+          used.push here.value
         end
-
-        terms = all_terms
-        all_pieces.each do |piece|
-          term = nil
-          terms = all_terms #if terms.empty?
-          until (term && !used_terms.include?(term)) || terms.empty?
-            term = terms.pop
-          end
-          used_terms.push term
-          next if term.nil?
-          other = (puzzle.pieces - [piece]).shuffle.pop
-          ident = (puzzle.terms - [term]).shuffle.pop
-          used_terms.push ident
-          clues.push Logigram::Premise.new(piece, puzzle.constraints[term], other.value(term), puzzle.constraints[ident])
-        end
-
-        # One more should guarantee the puzzle can always be solved
-        # Generic negative on the solution piece
-        # term = (all_terms - [puzzle.solution_term]).shuffle.pop
-        # ident = (all_terms - [puzzle.solution_term, term]).shuffle.pop
-        # other = (puzzle.pieces - [puzzle.solution]).shuffle.pop
-        # clues.push Logigram::Premise.new(puzzle.solution, puzzle.constraints[term], other.value(term), puzzle.constraints[ident])
+        previous = constraint
       end
-
-      @clues = clues
+      @clues = result
     end
 
-    def all_terms
-      @all_terms ||= @puzzle.terms.shuffle
-      @all_terms.clone
+    # @param constraint [Logigram::Constraint]
+    # @param reductions [Array<Logigram::Piece>]
+    # @param parent [Logigram::Constraint]
+    # @return [Array<Logigram::Premise>]
+    def generate_premises constraint, reductions, parent, used
+      result = []
+      passed = false
+      @puzzle.pieces[0..-2].each do |piece|
+        reductions.push piece if passed
+        next if used.include?(piece.value(constraint.name))
+        premise, last = generate_premise(piece, constraint, parent, reductions, used)
+        result.push premise
+        break if premise.identifier && result.length > 1
+        used.push last
+        passed = true
+      end
+      result
     end
 
-    def all_pieces
-      @all_pieces ||= @puzzle.pieces.shuffle
-      @all_pieces.clone
+    def generate_premise piece, constraint, parent, reductions, used
+      value = if reductions.include?(piece) || piece == @puzzle.solution
+        values = @puzzle.pieces.map { |pc| pc.value(constraint.name) }
+        (values - used - [piece.value(constraint.name)]).sample
+      else
+        piece.value(constraint.name)
+      end
+      [Logigram::Premise.new(piece, constraint, value, parent), value]
     end
   end
 end

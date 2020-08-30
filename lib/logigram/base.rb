@@ -9,6 +9,7 @@ module Logigram
   #   end
   #
   class Base
+    # @return [Array<Logigram::Piece>]
     attr_reader :pieces
 
     class << self
