@@ -20,13 +20,13 @@ module Logigram
       # One piece doesn't get a specific affirmative
       other = pieces.pop
 
-      used = []
+      used_terms = []
 
       (pieces - [other]).each do |piece|
         # specific affirmative
         terms = (all_terms - [puzzle.solution_term]) if terms.empty?
         term = terms.pop
-        used.push terms
+        used_terms.push term
         clues.push Logigram::Premise.new(piece, puzzle.constraints[term], piece.value(term))
       end
       # Rest are specific negative
@@ -50,10 +50,16 @@ module Logigram
 
         terms = all_terms
         all_pieces.each do |piece|
-          terms = all_terms if terms.empty?
-          term = terms.pop
+          term = nil
+          terms = all_terms #if terms.empty?
+          until (term && !used_terms.include?(term)) || terms.empty?
+            term = terms.pop
+          end
+          used_terms.push term
+          next if term.nil?
           other = (puzzle.pieces - [piece]).shuffle.pop
           ident = (puzzle.terms - [term]).shuffle.pop
+          used_terms.push ident
           clues.push Logigram::Premise.new(piece, puzzle.constraints[term], other.value(term), puzzle.constraints[ident])
         end
 
