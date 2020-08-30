@@ -6,75 +6,76 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     attr_reader :clues
 
-    # @param puzzle [Logigram::Puzzle]
+    # @param puzzle [Logigram::Base]
     def initialize puzzle
-      @premises = puzzle.premises.clone
-      @clues = []
-
-      # Eliminate the premise that would solve the puzzle with one clue, e.g.,
-      # if the solution has red hair, eliminate "Bob has red hair."
-      eliminate piece: puzzle.solution, term: puzzle.solution_term, affirmative: true, specific: true
-      # Higher difficulty
-      eliminate term: puzzle.solution_term, affirmative: true, specific: true
-      # Even higher (generic premises that reveal the solution constraint with a generic subject)
-      eliminate term: puzzle.solution_term, affirmative: true, specific: false
-      # Specific negative premises about the solution facet
-      eliminate term: puzzle.solution_term, affirmative: false, specific: true, value: puzzle.solution.value(puzzle.solution_term)
-      (puzzle.pieces - [puzzle.pieces.sample]).each do |p|
-        specify(p)
-      end
-      # Eliminate all remaining specific true premises
-      eliminate affirmative: true, specific: true
-      puzzle.pieces.each do |p|
-        specify(p, false)
-      end
-      # Eliminate affirmative generic premises about the solution facet
-      eliminate term: puzzle.solution_term, affirmative: true, specific: false
-      # Eliminate all generic premises about the solution piece
-      eliminate piece: puzzle.solution, specific: false
-      puzzle.pieces.each do |p|
-        implicate(p, true)
-      end
-      puzzle.pieces.each do |p|
-        implicate(p, false)
-        implicate(p, false)
-      end
-      @clues = [@clues[0]] + clues[1..-1].shuffle
+      temp puzzle
     end
 
-    private
+    def temp puzzle
+      @puzzle = puzzle
+      clues = []
 
-    def specify piece, affirmative = true
-      opts = []
-      @premises.each do |p|
-        opts.push p if p.fit(piece: piece, affirmative: affirmative, specific: true)
+      terms = (all_terms - [puzzle.solution_term])
+      pieces = all_pieces
+      # One piece doesn't get a specific affirmative
+      other = pieces.pop
+
+      used = []
+
+      (pieces - [other]).each do |piece|
+        # specific affirmative
+        terms = (all_terms - [puzzle.solution_term]) if terms.empty?
+        term = terms.pop
+        used.push terms
+        clues.push Logigram::Premise.new(piece, puzzle.constraints[term], piece.value(term))
       end
-      result = opts.sample
-      return if result.nil?
-      @premises.delete result
-      eliminate piece: piece, term: result.term, specific: true
-      eliminate term: result.term, affirmative: false, value: result.value
-      @clues.push result
+      # Rest are specific negative
+      [other].each do |piece|
+        # terms = all_terms if terms.empty?
+        term = terms.pop
+        term = puzzle.solution_term if term.nil?
+        # herr = (pieces - [piece, puzzle.solution]).shuffle.first
+        herr = pieces.shuffle.first
+        clues.push Logigram::Premise.new(other, puzzle.constraints[term], herr.value(term))
+      end
+
+      if puzzle.terms.length > 2
+        pieces = all_pieces
+        (puzzle.terms - [puzzle.solution_term]).each do |term|
+          pieces = all_pieces if pieces.empty?
+          piece = pieces.pop
+          ident = (puzzle.terms - [term]).shuffle.pop
+          clues.push Logigram::Premise.new(piece, puzzle.constraints[term], piece.value(term), puzzle.constraints[ident])
+        end
+
+        terms = all_terms
+        all_pieces.each do |piece|
+          terms = all_terms if terms.empty?
+          term = terms.pop
+          other = (puzzle.pieces - [piece]).shuffle.pop
+          ident = (puzzle.terms - [term]).shuffle.pop
+          clues.push Logigram::Premise.new(piece, puzzle.constraints[term], other.value(term), puzzle.constraints[ident])
+        end
+
+        # One more should guarantee the puzzle can always be solved
+        # Generic negative on the solution piece
+        # term = (all_terms - [puzzle.solution_term]).shuffle.pop
+        # ident = (all_terms - [puzzle.solution_term, term]).shuffle.pop
+        # other = (puzzle.pieces - [puzzle.solution]).shuffle.pop
+        # clues.push Logigram::Premise.new(puzzle.solution, puzzle.constraints[term], other.value(term), puzzle.constraints[ident])
+      end
+
+      @clues = clues
     end
 
-    def implicate piece, affirmative = true
-      opts = []
-      @premises.each do |p|
-        opts.push p if p.fit(piece: piece, affirmative: affirmative, specific: false)
-      end
-      result = opts.sample
-      return if result.nil?
-      @premises.delete result
-      eliminate piece: piece, term: result.term, affirmative: true, specific: true
-      # Remove generic premises that match affirmative premise
-      eliminate piece: piece, term: result.term, specific: false if affirmative
-      @clues.push result
+    def all_terms
+      @all_terms ||= @puzzle.terms.shuffle
+      @all_terms.clone
     end
 
-    def eliminate piece: nil, term: nil, affirmative: nil, specific: nil, value: nil, name: nil
-      @premises.delete_if { |p|
-        p.fit(piece: piece, term: term, affirmative: affirmative, specific: specific, value: value, name: name)
-      }
+    def all_pieces
+      @all_pieces ||= @puzzle.pieces.shuffle
+      @all_pieces.clone
     end
   end
 end
