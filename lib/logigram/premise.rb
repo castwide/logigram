@@ -84,14 +84,11 @@ module Logigram
     #
     # @return [String]
     def text
-      if @text.nil?
-        if affirmative?
-          @text = "#{subject} #{constraint.predicate(value)}"
-        else
-          @text = "#{subject} #{constraint.negative(value)}"
-        end
+      @text ||= if affirmative?
+        "#{subject} #{constraint.predicate(value)}"
+      else
+        "#{subject} #{constraint.negative(value)}"
       end
-      @text
     end
 
     # Compare the premise to the provided properties. Nil properties always

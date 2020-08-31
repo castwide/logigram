@@ -50,7 +50,8 @@ module Logigram
     def generate_premise piece, constraint, parent, reductions, used
       value = if reductions.include?(piece) || (piece == @puzzle.solution && @puzzle.solution_term == constraint.name)
         values = @puzzle.pieces.map { |pc| pc.value(constraint.name) }
-        (values - used - [piece.value(constraint.name)]).sample
+        # Sometimes we can wind up here even though the piece's current value is the only available option
+        (values - used - [piece.value(constraint.name)]).sample || piece.value(constraint.name)
       else
         piece.value(constraint.name)
       end
