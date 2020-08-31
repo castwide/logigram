@@ -9,7 +9,6 @@ module Logigram
     # @param puzzle [Logigram::Base]
     def initialize puzzle
       @puzzle = puzzle
-      @premises = []
       reductions = []
       previous = nil
       @sorted = @puzzle.constraints.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
@@ -27,6 +26,8 @@ module Logigram
       end
       @clues = constraint_premises.flatten
     end
+
+    private
 
     # @param constraint [Logigram::Constraint]
     # @param reductions [Array<Logigram::Piece>]
