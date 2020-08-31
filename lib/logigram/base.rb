@@ -120,7 +120,7 @@ module Logigram
       @solution.value(@solution_term)
     end
 
-    # Shortcut to get the solution facet's predicate, e.g., "is red"
+    # Shortcut to get the solution term's predicate, e.g., "is red"
     #
     # @return [String]
     def solution_predicate
