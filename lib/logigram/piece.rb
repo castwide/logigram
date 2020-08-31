@@ -19,6 +19,7 @@ module Logigram
     # Get the value assigned to this piece for the specified term.
     #
     # @param term [String] The name of a constraint
+    # @return [Object]
     def value term
       @terms[term]
     end

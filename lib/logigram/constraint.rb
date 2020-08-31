@@ -64,10 +64,14 @@ module Logigram
       end
     end
 
+    # @param ary [Array<Object>]
+    # @return [void]
     def validate_reserves ary
       ary.each { |v| validate_reserve(v) }
     end
 
+    # @param val [Object]
+    # @return [void]
     def validate_reserve val
       raise SelectionError, "Selection '#{val} is not a valid value" unless values.include?(val)
     end
