@@ -5,8 +5,8 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog', 'cat', 'pig'])
-    expect(puzzle.terms).to eq(['color'])
-    expect(puzzle.constraints['color'].values).to eq(['red', 'green', 'blue'])
+    expect(puzzle.constraints.map(&:name)).to eq(['color'])
+    expect(puzzle.constraint('color').values).to eq(['red', 'green', 'blue'])
   end
 
   it 'accepts a solution' do

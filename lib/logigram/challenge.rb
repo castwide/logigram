@@ -12,7 +12,7 @@ module Logigram
       @premises = []
       reductions = []
       previous = nil
-      @sorted = @puzzle.constraints.values.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
+      @sorted = @puzzle.constraints.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
       constraint_premises = []
       @sorted.each_with_index do |constraint, idx|
         here = generate_premises(constraint, reductions, previous)

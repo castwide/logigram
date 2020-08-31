@@ -16,7 +16,7 @@ puzzle = Puzzle.new(['the dog', 'the cat', 'the pig'])
 challenge = Logigram::Challenge.new(puzzle)
 
 puts "The animals are #{puzzle.pieces.join(', ')}"
-puzzle.constraints.values.each do |c|
+puzzle.constraints.each do |c|
   puts "One of each is #{c.values.join(', ')}"
 end
 puts "Which animal #{puzzle.solution_predicate}?"
