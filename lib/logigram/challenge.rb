@@ -12,20 +12,20 @@ module Logigram
       @premises = []
       reductions = []
       previous = nil
-      result = []
       @sorted = @puzzle.constraints.values.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
+      constraint_premises = []
       @sorted.each_with_index do |constraint, idx|
         here = generate_premises(constraint, reductions, previous)
         reductions.clear
-        result.concat here
+        constraint_premises.push here
         unless @sorted.last == constraint
           here, _ = generate_premise(@puzzle.pieces.last, @sorted[idx + 1], constraint, [@puzzle.pieces.last], here.map { |pr| pr.value })
-          result.push here
+          constraint_premises.last.push here
           reductions.push here
         end
         previous = constraint
       end
-      @clues = [result[0]] + result[1..-1].shuffle
+      @clues = constraint_premises.flatten
     end
 
     # @param constraint [Logigram::Constraint]
@@ -38,7 +38,6 @@ module Logigram
       used = []
       @puzzle.pieces[0..-2].each do |piece|
         reductions.push piece if passed
-        # next if used.include?(piece.value(constraint.name))
         premise, last = generate_premise(piece, constraint, parent, reductions, used)
         result.push premise
         used.push last
