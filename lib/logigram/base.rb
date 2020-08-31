@@ -30,7 +30,7 @@ module Logigram
       # Get a constraint by name.
       #
       # @param name [String]
-      # @return [Constraint]
+      # @return [Constraint, nil]
       def constraint name
         constraint_map[name]
       end
