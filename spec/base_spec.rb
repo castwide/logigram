@@ -31,6 +31,7 @@ RSpec.describe Logigram::Base do
   it 'generates premises' do
     klass = Class.new(Logigram::Base) do
       constrain 'color', ['red', 'green', 'blue']
+      constrain 'size', ['small', 'medium', 'large']
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog', 'cat', 'pig'])
