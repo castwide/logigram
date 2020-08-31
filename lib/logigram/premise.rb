@@ -91,27 +91,6 @@ module Logigram
       end
     end
 
-    # Compare the premise to the provided properties. Nil properties always
-    # match.
-    #
-    # @example
-    #   premise.fit piece: piece #=> Premise fits the specified piece
-    #   premise.fit term: term   #=> Premise fits the specified term
-    #
-    #def fit piece: nil, term: nil, positive: nil, specific: nil, name: nil, value: nil
-    def fit piece: nil, constraint: nil, term: nil, affirmative: nil, identifier: nil, specific: nil, name: nil, value: nil
-      (
-        (piece.nil? or self.piece == piece) and
-        (constraint.nil? or self.constraint == constraint) and
-        (term.nil? or self.constraint.name == term) and
-        (affirmative.nil? or self.affirmative? == affirmative) and
-        (identifier.nil? or self.identifier == identifier) and
-        (specific.nil? or self.specific? == specific) and
-        (name.nil? or self.name == name) and
-        (value.nil? or self.value == value)
-      )
-    end
-
     def to_s
       text
     end
