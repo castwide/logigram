@@ -134,6 +134,7 @@ module Logigram
 
     # Get the piece associated with an object.
     #
+    # @param object [Object] The object used to generate the piece
     # @return [Logigram::Piece]
     def piece_for object
       @object_pieces[object]
@@ -148,25 +149,20 @@ module Logigram
     # @return [void]
     def generate_pieces objects, solution
       selected = solution || objects.sample
-      objects.each { |o| insert o, o == selected }
+      objects.each { |o| insert o, o == selected, generate_constraint_repo }
     end
 
-    def insert object, selected
+    def insert object, selected, repo
       terms = {}
       # @param c [Constraint]
       constraints.each do |c|
-        pick = if selected
-          reserves[c.name][:answer]
-        else
-          reserves[c.name][:others].pop
-        end
+        pick = selected ? repo[c.name][:answer] : repo[c.name][:others].pop
         raise "Unable to select value for constraint '#{c.name}'" if pick.nil?
         terms[c.name] = pick
       end
       p = Piece.new(object, terms)
       @solution = p if selected
       @object_pieces[object] = p
-      p
     end
 
     # Create an array of all possible premises for the puzzle.
@@ -207,18 +203,16 @@ module Logigram
       result
     end
 
-    def reserves
-      @reserves ||= begin
-        r = {}
-        self.class.constraints.each do |constraint|
-          answer = constraint.reserves.sample
-          r[constraint.name] = {
-            answer: answer,
-            others: (constraint.values - [answer]).shuffle
-          }
-        end
-        r
+    def generate_constraint_repo
+      r = {}
+      self.class.constraints.each do |constraint|
+        answer = constraint.reserves.sample
+        r[constraint.name] = {
+          answer: answer,
+          others: (constraint.values - [answer]).shuffle
+        }
       end
+      r
     end
   end
 end
