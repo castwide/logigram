@@ -46,7 +46,7 @@ module Logigram
       # @param reserve [Object, Array<Object>, nil] Require the solution to be one of these values
       # @return [Logigram::Constraint] The newly created constraint
       def constrain name, values, subject: nil, predicate: nil, negative: nil, reserve: nil
-        f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative, reserve: nil)
+        f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative, reserve: reserve)
         constraints[name] = f
         f
       end
@@ -200,7 +200,7 @@ module Logigram
           answer = constraint.reserves.sample
           r[constraint.name] = {
             answer: answer,
-            others: (constraint.reserves - [answer]).shuffle
+            others: (constraint.values - [answer]).shuffle
           }
         end
         r

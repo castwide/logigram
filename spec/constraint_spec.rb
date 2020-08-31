@@ -21,6 +21,11 @@ RSpec.describe Logigram::Constraint do
     expect(constraint.subject 'red').to eq('is a color other than red')
   end
 
+  it 'sets reserves' do
+    constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], reserve: 'blue')
+    expect(constraint.reserves).to eq(['blue'])
+  end
+
   it 'throws an error for invalid reserves' do
     expect {
       Logigram::Constraint.new('color', ['red', 'blue'], reserve: 'green')
