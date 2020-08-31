@@ -3,6 +3,9 @@ module Logigram
     # @return [Object]
     attr_reader :object
 
+    # @param object [Object]
+    # @param terms [Hash]
+    # @param name [String]
     def initialize object, terms, name: nil
       @object = object
       @terms = terms
