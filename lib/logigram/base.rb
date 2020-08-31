@@ -169,11 +169,7 @@ module Logigram
     #
     # @return [Array<Logigram::Premise>]
     def generate_all_premises
-      result = []
-      pieces.each do |piece|
-        result.concat generate_piece_premises(piece)
-      end
-      result
+      pieces.map { |pc| generate_piece_premises pc }.flatten
     end
 
     # Create an array of all possible premises for the specified piece.
