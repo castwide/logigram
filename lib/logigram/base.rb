@@ -9,8 +9,11 @@ module Logigram
   #   end
   #
   class Base
-    # @return [Array<Logigram::Piece>]
-    attr_reader :pieces
+    # The piece that represents the solution. The puzzle's premises should be
+    # clues from which this solution can be deduced.
+    #
+    # @return [Logigram::Piece]
+    attr_reader :solution
 
     class << self
       # A hash of the puzzle's constraints.
@@ -27,8 +30,7 @@ module Logigram
 
       # Add a constraint to the puzzle.
       #
-      # @example The pieces in the instantiated puzzle will each be assigned a
-      # unique color and size.
+      # @example The pieces in the instantiated puzzle will each be assigned a unique color and size.
       #
       #   class MyPuzzle < Logigram::Base
       #     constrain 'color', ['red', 'green', 'blue']
@@ -37,31 +39,30 @@ module Logigram
       #   puzzle = MyPuzzle.new ['dog', 'cat', 'rat']
       #
       # @param name [String]
-      # @param values [Array<String>]
+      # @param values [Array<Object>]
       # @param subject [String, nil]
       # @param predicate [String, nil]
       # @param negative [String, nil]
+      # @param reserve [Object, Array<Object>, nil] Require the solution to be one of these values
       # @return [Logigram::Constraint] The newly created constraint
-      def constrain name, values, subject: nil, predicate: nil, negative: nil
-        f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative)
+      def constrain name, values, subject: nil, predicate: nil, negative: nil, reserve: nil
+        f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative, reserve: nil)
         constraints[name] = f
         f
       end
     end
 
+    # Generate a puzzle with the provided configuration.
+    #
+    # The `objects` array is required. If `solution` and `term` are not provided, they'll be randomly generated.
+    #
+    # @param objects [Array<Object>] The piece identifiers
+    # @param solution [Object, nil] Which object to use as the solution
+    # @param term [String, nil] The solution term
     def initialize objects, solution: nil, term: nil
       @object_pieces = {}
-      @picks = {}
-      self.class.constraints.each_pair { |k, d| @picks[d.name] = d.values.clone }
-
-      @pieces = []
-      objects.each do |p|
-        r = insert(p)
-        @solution = r if p == solution
-      end
-
-      @solution ||= @pieces.sample
-      @solution_term = term || @picks.keys.sample
+      @solution_term = term || self.class.constraints.keys.sample
+      generate_pieces objects, (solution || objects.sample)
     end
 
     # @return [Array<Premise>]
@@ -87,16 +88,8 @@ module Logigram
     # @return [Array<Object>]
     def term_values key
       result = []
-      @pieces.each { |p| result.push p.value(key) unless p.value(key).nil? }
+      pieces.each { |p| result.push p.value(key) unless p.value(key).nil? }
       self.class.constraints[key].values & result
-    end
-
-    # The piece that represents the solution. The puzzle's premises should be
-    # clues from which this solution can be deduced.
-    #
-    # @return [Logigram::Piece]
-    def solution
-      @solution
     end
 
     # The term that should be used to identify the solution.
@@ -120,14 +113,9 @@ module Logigram
       self.class.constraints[@solution_term].predicate(@solution.value(@solution_term))
     end
 
-    # Select an unused value for a term.
-    #
-    def pick key
-      raise ArgumentError, 'Term not set' unless self.class.constraints.include?(key)
-      raise "Not enough values in #{key} term" if @picks[key].empty?
-      picked = @picks[key].sample
-      @picks[key].delete picked
-      picked
+    # @return [Array<Logigram::Piece>]
+    def pieces
+      @object_pieces.values
     end
 
     # Get the piece associated with an object.
@@ -139,18 +127,31 @@ module Logigram
 
     private
 
-    # Add a piece to the puzzle.
+    # Generate the puzzle pieces.
     #
-    # @param object [#to_s]
-    # @return [Logigram::Piece] The newly created piece.
-    def insert object
+    # @param objects [Array<#to_s>]
+    # @param solution [#to_s, nil]
+    # @return [void]
+    def generate_pieces objects, solution
+      selected = solution || objects.sample
+      objects.each { |o| insert o, o == selected }
+    end
+
+    def insert object, selected
       terms = {}
+      # @param c [Constraint]
       constraints.values.each do |c|
-        terms[c.name] = pick(c.name)
+        pick = if selected
+          reserves[c.name][:answer]
+        else
+          reserves[c.name][:others].pop
+        end
+        raise "Unable to select value for constraint '#{c.name}'" if pick.nil?
+        terms[c.name] = pick
       end
       p = Piece.new(object, terms)
+      @solution = p if selected
       @object_pieces[object] = p
-      @pieces.push p
       p
     end
 
@@ -190,6 +191,20 @@ module Logigram
         end
       end
       result
+    end
+
+    def reserves
+      @reserves ||= begin
+        r = {}
+        self.class.constraints.values.each do |constraint|
+          answer = constraint.reserves.sample
+          r[constraint.name] = {
+            answer: answer,
+            others: (constraint.reserves - [answer]).shuffle
+          }
+        end
+        r
+      end
     end
   end
 end
