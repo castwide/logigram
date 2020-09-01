@@ -96,14 +96,12 @@ module Logigram
       self.class.constraint name
     end
 
-    # Get an array of possible values for a constraint.
-    # This method will only include values that are currently in use.
+    # Get an array of values for a constraint.
+    # This method will only include values that are currently assigned to pieces.
     #
     # @return [Array<Object>]
     def term_values key
-      result = []
-      pieces.each { |p| result.push p.value(key) unless p.value(key).nil? }
-      self.class.constraint(key).values & result
+      pieces.map { |p| p.value(key) }
     end
 
     # The term that should be used to identify the solution.
@@ -149,7 +147,8 @@ module Logigram
     # @return [void]
     def generate_pieces objects, solution
       selected = solution || objects.sample
-      objects.each { |o| insert o, o == selected, generate_constraint_repo }
+      repo = generate_constraint_repo
+      objects.each { |o| insert o, o == selected, repo }
     end
 
     def insert object, selected, repo
