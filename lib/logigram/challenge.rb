@@ -11,7 +11,7 @@ module Logigram
       @puzzle = puzzle
       reductions = []
       previous = nil
-      @sorted = @puzzle.constraints.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
+      @sorted = @puzzle.constraints.shuffle.sort { |a, b| (b.name == @puzzle.solution_term ? 0 : 1) }
       constraint_premises = []
       @sorted.each_with_index do |constraint, idx|
         here = generate_premises(constraint, reductions, previous)
@@ -24,7 +24,8 @@ module Logigram
         end
         previous = constraint
       end
-      @clues = constraint_premises.flatten
+      flat = constraint_premises.flatten
+      @clues = [flat[0]] + flat[1..-1].shuffle
     end
 
     private
