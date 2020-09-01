@@ -101,7 +101,9 @@ module Logigram
     #
     # @return [Array<Object>]
     def term_values key
-      pieces.map { |p| p.value(key) }
+      # Use an intersection to retain the order in which the values were
+      # assigned to the constraint
+      self.class.constraint(key).values & pieces.map { |p| p.value(key) }
     end
 
     # The term that should be used to identify the solution.
