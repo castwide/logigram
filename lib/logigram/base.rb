@@ -76,7 +76,7 @@ module Logigram
     # @param term [String, nil] The solution term
     def initialize objects, solution: nil, term: nil
       @object_pieces = {}
-      @solution_term = term || self.class.constraints.map(&:name).sample
+      @solution_term = term || constraints.map(&:name).sample
       generate_pieces objects, (solution || objects.sample)
     end
 
@@ -103,7 +103,7 @@ module Logigram
     def term_values key
       # Use an intersection to retain the order in which the values were
       # assigned to the constraint
-      self.class.constraint(key).values & pieces.map { |p| p.value(key) }
+      constraint(key).values & pieces.map { |p| p.value(key) }
     end
 
     # The term that should be used to identify the solution.
@@ -124,7 +124,7 @@ module Logigram
     #
     # @return [String]
     def solution_predicate
-      self.class.constraint(@solution_term).predicate(@solution.value(@solution_term))
+      constraint(@solution_term).predicate(@solution.value(@solution_term))
     end
 
     # @return [Array<Logigram::Piece>]
@@ -181,19 +181,19 @@ module Logigram
       result = []
       piece.terms.each do |t|
         # Positive specific
-        result.push Premise.new(piece, self.class.constraint(t), piece.value(t))
+        result.push Premise.new(piece, constraint(t), piece.value(t))
         # Positive generic
-        (self.class.constraints - [self.class.constraint(t)]).each do |o|
-          result.push Premise.new(piece, self.class.constraint(t), piece.value(t), o)
+        (constraints - [constraint(t)]).each do |o|
+          result.push Premise.new(piece, constraint(t), piece.value(t), o)
         end
         # Negative specific
         (term_values(t) - [piece.value(t)]).each do |o|
-          result.push Premise.new(piece, self.class.constraint(t), o)
+          result.push Premise.new(piece, constraint(t), o)
         end
         # Negative generic
         (term_values(t) - [piece.value(t)]).each do |o|
-          (self.class.constraints - [self.class.constraint(t)]).each do |id|
-            result.push Premise.new(piece, self.class.constraint(t), o, id)
+          (constraints - [constraint(t)]).each do |id|
+            result.push Premise.new(piece, constraint(t), o, id)
           end
         end
       end
@@ -202,7 +202,7 @@ module Logigram
 
     def generate_constraint_repo
       r = {}
-      self.class.constraints.each do |constraint|
+      constraints.each do |constraint|
         answer = constraint.reserves.sample
         r[constraint.name] = {
           answer: answer,

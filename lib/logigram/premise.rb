@@ -9,15 +9,22 @@ module Logigram
   #   "The short person has red hair."
   #
   class Premise
-    # @return [Logigram::Piece]
+    # @return [Piece]
     attr_reader :piece
-    # @return [Logigram::Constraint]
+
+    # @return [Constraint]
     attr_reader :constraint
+
     # @return [String]
     attr_reader :value
-    # @return [Logigram::Constraint]
+
+    # @return [Constraint]
     attr_reader :identifier
 
+    # @param piece [Piece]
+    # @param constraint [Constraint]
+    # @param value [String]
+    # @param identifier [Constraint, nil]
     def initialize piece, constraint, value, identifier = nil
       @piece = piece
       @constraint = constraint
