@@ -43,6 +43,12 @@ module Logigram
       identifier.nil?
     end
 
+    # Determine if this is a generic premise.
+    # @see #specific?
+    def generic?
+      !specific?
+    end
+
     # Determine if this is an affirmative premise.
     # An affirmative premise is a fact, e.g., "The dog is red."
     # A negative premise is a reduction, e.g., "The dog is not blue."

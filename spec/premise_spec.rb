@@ -29,4 +29,18 @@ RSpec.describe Logigram::Premise do
     premise = Logigram::Premise.new(piece, constraint, 'blue')
     expect(premise).to be_negative
   end
+
+  it 'uses predicate for affirmative text' do
+    constraint = Logigram::Constraint.new('color', ['red', 'blue'], predicate: 'affirm')
+    piece = Logigram::Piece.new('dog', {'color' => 'red'})
+    premise = Logigram::Premise.new(piece, constraint, 'red')
+    expect(premise.text).to eq('dog affirm')
+  end
+
+  it 'uses negative for negative text' do
+    constraint = Logigram::Constraint.new('color', ['red', 'blue'], negative: 'negate')
+    piece = Logigram::Piece.new('dog', {'color' => 'red'})
+    premise = Logigram::Premise.new(piece, constraint, 'blue')
+    expect(premise.text).to eq('dog negate')
+  end
 end
