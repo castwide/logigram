@@ -17,4 +17,15 @@ RSpec.describe Logigram::Challenge do
     strings = challenge.clues.map(&:to_s)
     expect(strings).not_to include("#{puzzle.solution} #{puzzle.solution_predicate}")
   end
+
+  it 'generates easy clues' do
+    challenge = Logigram::Challenge.new(puzzle, difficulty: :easy)
+    expect(challenge.clues.length).to eq(4)
+    expect(challenge.clues.all?(&:affirmative?)).to be(true)
+  end
+
+  it 'generates hard clues' do
+    challenge = Logigram::Challenge.new(puzzle, difficulty: :hard)
+    expect(challenge.clues.select(&:affirmative?).length).to eq(2)
+  end
 end
