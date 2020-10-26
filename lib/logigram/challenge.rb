@@ -60,6 +60,7 @@ module Logigram
       (@puzzle.pieces - [@puzzle.solution]).shuffle.each_with_index do |piece, index|
         @clues.push generate_premise(piece, shuffled_constraints.last, last_constraint, affirmation_at(index))
       end
+      @clues = [@clues[0]] + @clues[1..-1].shuffle
     end
 
     # @param index [Integer]
