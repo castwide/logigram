@@ -25,7 +25,11 @@ module Logigram
 
     # @return [Array<Constraint>]
     def shuffled_constraints
-      @shuffled_constraints ||= (@puzzle.constraints - [@puzzle.constraint(@puzzle.solution_term)]).shuffle + [@puzzle.constraint(@puzzle.solution_term)]
+      @shuffled_constraints ||= begin
+        other = (@puzzle.constraints - [@puzzle.constraint(@puzzle.solution_term)]).shuffle
+        first = other.shift
+        [first] + (other + [@puzzle.constraint(@puzzle.solution_term)]).shuffle
+      end
     end
 
     # Remove a value from a term's availability list.
