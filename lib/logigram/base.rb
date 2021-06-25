@@ -73,10 +73,10 @@ module Logigram
     #
     # @param objects [Array<Object>] The piece identifiers
     # @param solution [Object, nil] Which object to use as the solution
-    # @param term [String, nil] The solution term
-    def initialize objects, solution: nil, term: nil
+    # @param terms [String, Array<String>, nil] The solution term(s)
+    def initialize objects, solution: nil, terms: nil
       @object_pieces = {}
-      @solution_term = term || constraints.map(&:name).sample
+      @solution_terms = terms ? [terms].flatten : [constraints.map(&:name).sample]
       generate_pieces objects, (solution || objects.sample)
     end
 
@@ -108,23 +108,45 @@ module Logigram
 
     # The term that should be used to identify the solution.
     #
-    # @return [String]
-    def solution_term
-      @solution_term
+    # @return [Array<String>]
+    def solution_terms
+      @solution_terms
     end
 
-    # Shortcut to get the solution tern's value, e.g., "red"
+    def solution_term
+      raise RuntimeError, 'Use `solution_terms` when there is more than one term' unless @solution_terms.length == 1
+      @solution_terms.first
+    end
+
+    # Shortcut to get the solution terms' values, e.g., "red"
     #
+    # @return [Array<String>]
+    def solution_values
+      @solution_terms.map { |t| @solution.value(t) }
+    end
+
+    # Shortcut to get the solution term's value, e.g., "red"
+    #
+    # @raise [RuntimeError] if there is more than one solution term
     # @return [String]
     def solution_value
-      @solution.value(@solution_term)
+      raise RuntimeError, 'Use `solution_values` when there is more than one term' unless @solution_terms.length == 1
+      @solution.value(@solution_terms.first)
+    end
+
+    # Shortcut to get the solution terms' predicates, e.g., "is red"
+    #
+    # @return [Array<String>]
+    def solution_predicates
+      @solution_terms.map { |t| contraint(t).predicate(@solution.value(t)) }
     end
 
     # Shortcut to get the solution term's predicate, e.g., "is red"
     #
     # @return [String]
     def solution_predicate
-      constraint(@solution_term).predicate(@solution.value(@solution_term))
+      raise RuntimeError, 'Use `solution_predicates` when there is more than one term' unless @solution_terms.length == 1
+      constraint(@solution_terms.first).predicate(@solution.value(@solution_terms.first))
     end
 
     # @return [Array<Logigram::Piece>]
