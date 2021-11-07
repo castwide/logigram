@@ -16,7 +16,7 @@ module Logigram
     end
 
     def subject value, amount = 1
-      (amount == 1 ? @subject : @plural) % {value: value}
+      (amount == 1 ? @subject : @plural) % {value: fix_article(value)}
     end
 
     def predicate value, amount = 1
@@ -35,6 +35,11 @@ module Logigram
 
     def negative_verb amount
       amount == 1 ? CONJUGATIONS[verb][2] : CONJUGATIONS[verb][3]
+    end
+
+    def fix_article(value)
+      return value unless @subject.include?('the %{value}')
+      value.sub(/^(a|an) %\{value\}/, '')
     end
   end
 
