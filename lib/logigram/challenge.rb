@@ -112,7 +112,7 @@ module Logigram
     def clarify piece, identifier
       return nil unless identifier
       total = @puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
-      total.length > 1 ? nil : identifier
+      total.length == 1 ? identifier : nil
     end
   end
 end
