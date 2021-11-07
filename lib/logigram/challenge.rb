@@ -32,18 +32,19 @@ module Logigram
       @unique_constraints ||= begin
         statistics = Statistics.new(@puzzle)
         solution_constraints.select do |con|
-          statistics.raw_data[con.name].values.all? { |v| v == 1 }
+          value = @puzzle.solution.value(con.name)
+          statistics.raw_data[con.name][value] == 1
         end
       end
     end
 
     # @return [Array<Constraint>]
-    def shuffled_constraints
-      @shuffled_constraints ||= begin
-        fixed_constraint = unique_constraints.sample || solution_constraints.sample
-        other = (@puzzle.constraints - [fixed_constraint]).shuffle
+    def sorted_constraints
+      @sorted_constraints ||= begin
+        fixed_constraints = unique_constraints || [solution_constraints.sample]
+        other = (@puzzle.constraints - fixed_constraints).shuffle
         first = other.shift
-        (first ? [first] : []) + (other + [fixed_constraint]).shuffle
+        (first ? [first] : []) + other + fixed_constraints
       end
     end
 
@@ -70,8 +71,8 @@ module Logigram
     # @return [void]
     def generate_premises
       last_constraint = nil
-      shuffled_constraints[0..-2].each do |constraint|
-        last_constraint = nil if solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
+      sorted_constraints[0..-2].each do |constraint|
+        # next if last_constraint && solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
         shuffled_pieces = @puzzle.pieces.shuffle
         shuffled_pieces[0..-2].each_with_index do |piece, index|
           @clues.push generate_premise(piece, constraint, last_constraint, affirmation_at(index))
@@ -79,7 +80,7 @@ module Logigram
         last_constraint = constraint
       end
       (@puzzle.pieces - [@puzzle.solution]).shuffle.each_with_index do |piece, index|
-        @clues.push generate_premise(piece, shuffled_constraints.last, last_constraint, affirmation_at(index))
+        @clues.push generate_premise(piece, sorted_constraints.last, last_constraint, affirmation_at(index))
       end
       @clues = [@clues[0]] + @clues[1..-1].shuffle
     end
