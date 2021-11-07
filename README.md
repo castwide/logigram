@@ -26,12 +26,7 @@ See [example.rb](example.rb) for a simple demonstration.
 
 ## TODO:
 
-- Support pieces with duplicate term values.
-    - Example: If a term is hair color, more than one piece can have brown hair.
-- Allow for multiple terms to determine the solution.
-    - Example: The solution has brown hair and blue eyes. Other pieces can have either brown hair or blue eyes, but not both.
-    - In this case, there might not need to be a solution term; the solution's combined terms just need to be unique.
-- Star Trek feature: Dynamically generate constraints and pieces from objects with existing properties.
+- Dynamically generate constraints and pieces from objects with existing properties.
     - Example: Three objects have existing properties `:hair_color` and `:eye_color`. The logigram uses the existing constraints
       and values.
     - The logigram will need to verify that the resulting challenge has exactly one discoverable solution.
