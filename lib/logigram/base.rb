@@ -49,15 +49,11 @@ module Logigram
       #
       # @param name [String]
       # @param values [Array<Object>]
-      # @param subject [String, nil]
-      # @param predicate [String, nil]
-      # @param negative [String, nil]
       # @param reserve [Object, Array<Object>, nil] Require the solution to be one of these values
+      # @param formatter [Formatter] Formatting rules for generated premises
       # @return [Logigram::Constraint] The newly created constraint
-      def constrain name, values, subject: nil, predicate: nil, negative: nil, reserve: nil
-        f = Constraint.new(name, values, subject: subject, predicate: predicate, negative: negative, reserve: reserve)
-        constraint_map[name] = f
-        f
+      def constrain name, values, reserve: nil, formatter: Formatter::DEFAULT
+        constraint_map[name] = Constraint.new(name, values, reserve: reserve, formatter: formatter)
       end
 
       private

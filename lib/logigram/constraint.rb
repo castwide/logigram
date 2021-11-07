@@ -5,23 +5,32 @@ module Logigram
   # constraint.
   #
   class Constraint
-    class SelectionError < ArgumentError; end
+    # @return [String]
+    attr_reader :name
 
-    attr_reader :name, :values, :reserves
+    # All possible values for the constraint
+    #
+    # @return [Array<String>]
+    attr_reader :values
+
+    # The subset of values that can be applied to solutions. When a puzzle
+    # generates a solution, its value for the constraint should be one of the
+    # reserves. (By default, reserves are all possible values.)
+    #
+    # @return [Array<String>]
+    attr_reader :reserves
+
+    attr_reader :formatter
 
     # @param name [String]
-    # @param values [Array]
-    # @param subject [String, nil]
-    # @param predicate [String, nil]
-    # @param negative [String, nil]
-    # @param reserve [Object, Array<Object>, nil]
-    def initialize name, values, subject: nil, predicate: nil, negative: nil, reserve: nil
+    # @param values [Array] All possible values for the constraint
+    # @param reserve [Object, Array<Object>, nil] Values to reserve for solutions
+    # @param formatter [Formatter] Formatting rules
+    def initialize name, values, reserve: nil, formatter: Formatter::DEFAULT
       @name = name
       @values = values
-      @subject = subject || 'the %{value} thing'
-      @predicate = predicate || 'is %{value}'
-      @negative = negative || 'is not %{value}'
       @reserves = configure_reserves(reserve)
+      @formatter = formatter
     end
 
     # A noun form for the value, e.g., "the red thing"
@@ -29,7 +38,7 @@ module Logigram
     # @return [String]
     def subject value
       validate value
-      @subject % { value: value }
+      formatter.subject(value)
     end
 
     # A verbal predicate for the value, e.g., "is red"
@@ -37,43 +46,29 @@ module Logigram
     # @return [String]
     def predicate value
       validate value
-      @predicate % { value: value }
+      formatter.predicate(value)
     end
 
     # A negative verbal predicate form for the value, e.g., "is not red"
     def negative value
       validate value
-      @negative % { value: value }
+      formatter.negative(value)
     end
 
     private
 
+    # @raise [ArgumentError] if the value is not valid
+    # @param value [String]
+    # @return [String]
     def validate value
-      return if values.include?(value)
+      return value if values.include?(value)
       raise ArgumentError, "Constraint for #{name} received invalid value #{value}"
     end
 
+    # @param reserve [String, Array<Sting>, nil]
     def configure_reserves(reserve)
       return values unless reserve
-      if reserve.is_a?(Array)
-        validate_reserves(reserve)
-        reserve
-      else
-        validate_reserve(reserve)
-        [reserve]
-      end
-    end
-
-    # @param ary [Array<Object>]
-    # @return [void]
-    def validate_reserves ary
-      ary.each { |v| validate_reserve(v) }
-    end
-
-    # @param val [Object]
-    # @return [void]
-    def validate_reserve val
-      raise SelectionError, "Selection '#{val} is not a valid value" unless values.include?(val)
+      [reserve].flatten.map { |v| validate(v) }
     end
   end
 end
