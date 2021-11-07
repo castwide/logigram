@@ -11,8 +11,6 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     attr_reader :clues
 
-    attr_reader :primary
-
     # @param puzzle [Logigram::Base]
     # @param difficulty [Symbol] :easy, :medium, :hard
     def initialize puzzle, difficulty: :medium
