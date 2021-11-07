@@ -44,15 +44,15 @@ module Logigram
     # A verbal predicate for the value, e.g., "is red"
     #
     # @return [String]
-    def predicate value
+    def predicate value, quantity = 1
       validate value
-      formatter.predicate(value)
+      formatter.predicate(value, quantity)
     end
 
     # A negative verbal predicate form for the value, e.g., "is not red"
-    def negative value
+    def negative value, quantity = 1
       validate value
-      formatter.negative(value)
+      formatter.negative(value, quantity)
     end
 
     private

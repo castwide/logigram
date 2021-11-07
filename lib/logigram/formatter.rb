@@ -8,7 +8,7 @@ module Logigram
     attr_reader :verb
 
     def initialize subject: 'the %{value} thing', plural: "#{subject}s", verb: :be, descriptor: '%{value}'
-      raise ArgumentError "Unrecognized verb #{verb}" unless CONJUGATIONS.key?(verb)
+      raise ArgumentError, "Unrecognized verb #{verb}" unless CONJUGATIONS.key?(verb)
       @verb = verb
       @subject = subject
       @plural = plural
