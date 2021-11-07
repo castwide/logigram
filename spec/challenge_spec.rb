@@ -41,4 +41,19 @@ RSpec.describe Logigram::Challenge do
       expect { Logigram::Challenge.new(puzzle, difficulty: diff) }.not_to raise_error
     end
   end
+
+  it 'supports duplicate values' do
+    klass = Class.new(Logigram::Base) do
+      constrain 'color', ['red', 'green']
+    end
+    # @type [Logigram::Base]
+    puzzle = klass.new(['pencil', 'pen', 'crayon'])
+    answer = puzzle.solution.value('color')
+    (puzzle.pieces - [puzzle.solution]).each do |piece|
+      expect(piece.value('color')).not_to eq(answer)
+    end
+    [:easy, :medium, :hard].each do |diff|
+      expect { Logigram::Challenge.new(puzzle, difficulty: diff) }.not_to raise_error
+    end
+  end
 end

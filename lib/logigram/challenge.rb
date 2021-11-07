@@ -30,7 +30,7 @@ module Logigram
         fixed_constraint = solution_constraints.sample
         other = (@puzzle.constraints - [fixed_constraint]).shuffle
         first = other.shift
-        [first] + (other + [fixed_constraint]).shuffle
+        (first ? [first] : []) + (other + [fixed_constraint]).shuffle
       end
     end
 
