@@ -6,20 +6,20 @@ RSpec.describe Logigram::Constraint do
     expect { constraint.negative 'gray' }.to raise_error(ArgumentError)
   end
 
-  it 'sets subject phrases' do
-    constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], subject: 'the %{value} piece')
-    expect(constraint.subject 'red').to eq('the red piece')
-  end
+  # it 'sets subject phrases' do
+  #   constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], subject: 'the %{value} piece')
+  #   expect(constraint.subject 'red').to eq('the red piece')
+  # end
 
-  it 'sets predicate phrases' do
-    constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], subject: 'is %{value} in color')
-    expect(constraint.subject 'red').to eq('is red in color')
-  end
+  # it 'sets predicate phrases' do
+  #   constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], subject: 'is %{value} in color')
+  #   expect(constraint.subject 'red').to eq('is red in color')
+  # end
 
-  it 'sets negative phrases' do
-    constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], subject: 'is a color other than %{value}')
-    expect(constraint.subject 'red').to eq('is a color other than red')
-  end
+  # it 'sets negative phrases' do
+  #   constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], subject: 'is a color other than %{value}')
+  #   expect(constraint.subject 'red').to eq('is a color other than red')
+  # end
 
   it 'sets a reserve' do
     constraint = Logigram::Constraint.new('color', ['red', 'green', 'blue'], reserve: 'blue')

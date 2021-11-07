@@ -20,19 +20,17 @@ module Logigram
     # @return [Array<String>]
     attr_reader :reserves
 
+    attr_reader :formatter
+
     # @param name [String]
     # @param values [Array] All possible values for the constraint
-    # @param subject [String, nil] The format string for the subject's common noun
-    # @param predicate [String, nil] The format string for the verbal predicate
-    # @param negative [String, nil] The format string for negative predicates
     # @param reserve [Object, Array<Object>, nil] Values to reserve for solutions
-    def initialize name, values, subject: nil, predicate: nil, negative: nil, reserve: nil
+    # @param formatter [Formatter] Formatting rules
+    def initialize name, values, reserve: nil, formatter: Formatter::DEFAULT
       @name = name
       @values = values
-      @subject = subject || 'the %{value} thing'
-      @predicate = predicate || 'is %{value}'
-      @negative = negative || 'is not %{value}'
       @reserves = configure_reserves(reserve)
+      @formatter = formatter
     end
 
     # A noun form for the value, e.g., "the red thing"
@@ -40,7 +38,7 @@ module Logigram
     # @return [String]
     def subject value
       validate value
-      @subject % { value: value }
+      formatter.subject(value)
     end
 
     # A verbal predicate for the value, e.g., "is red"
@@ -48,13 +46,13 @@ module Logigram
     # @return [String]
     def predicate value
       validate value
-      @predicate % { value: value }
+      formatter.predicate(value)
     end
 
     # A negative verbal predicate form for the value, e.g., "is not red"
     def negative value
       validate value
-      @negative % { value: value }
+      formatter.negative(value)
     end
 
     private
