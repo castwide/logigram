@@ -11,6 +11,8 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     attr_reader :clues
 
+    attr_reader :primary
+
     # @param puzzle [Logigram::Base]
     # @param difficulty [Symbol] :easy, :medium, :hard
     def initialize puzzle, difficulty: :medium
@@ -23,11 +25,26 @@ module Logigram
 
     private
 
+    attr_reader :shuffled_constraints
+
+    def solution_constraints
+      @solution_constraints ||= @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
+    end
+
     # @return [Array<Constraint>]
-    def shuffled_constraints
-      @shuffled_constraints ||= begin
-        solution_constraints = @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
-        fixed_constraint = solution_constraints.sample
+    def unique_constraints
+      @unique_constraints ||= begin
+        statistics = Statistics.new(@puzzle)
+        solution_constraints.select do |con|
+          statistics.raw_data[con.name].values.all? { |v| v == 1 }
+        end
+      end
+    end
+
+    # @return [Array<Constraint>]
+    def shuffle_constraints
+      @shuffled_constraints = begin
+        fixed_constraint = unique_constraints.sample || solution_constraints.sample
         other = (@puzzle.constraints - [fixed_constraint]).shuffle
         first = other.shift
         (first ? [first] : []) + (other + [fixed_constraint]).shuffle
@@ -56,13 +73,19 @@ module Logigram
 
     # @return [void]
     def generate_premises
+      shuffle_constraints
       last_constraint = nil
       shuffled_constraints[0..-2].each do |constraint|
         shuffled_pieces = @puzzle.pieces.shuffle
         shuffled_pieces[0..-2].each_with_index do |piece, index|
           @clues.push generate_premise(piece, constraint, last_constraint, affirmation_at(index))
         end
-        last_constraint = constraint
+        # last_constraint = constraint
+        last_constraint = if solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
+          nil
+        else
+          constraint
+        end
       end
       (@puzzle.pieces - [@puzzle.solution]).shuffle.each_with_index do |piece, index|
         @clues.push generate_premise(piece, shuffled_constraints.last, last_constraint, affirmation_at(index))
