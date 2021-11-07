@@ -172,17 +172,25 @@ module Logigram
         c = constraint(term)
         selected_values[term] = c.reserves.sample
       end
+      @solution = generate_piece(selected_object, selected_values, true)
+      @object_pieces[selected_object] = @solution
       objects.each do |o|
-        constraint_repo = generate_constraint_repo(selected_values, o == selected_object)
-        terms = {}
-        constraint_repo.each_pair do |key, values|
-          raise "Unable to select value for constraint '#{key}'" if values.empty?
-          terms[key] = values.sample
+        @object_pieces[o] = if o == selected_object
+          @solution
+        else
+          generate_piece(o, selected_values, false)
         end
-        piece = Piece.new(o, terms)
-        @solution = piece if o == selected_object
-        @object_pieces[o] = piece
       end
+    end
+
+    def generate_piece object, selected_values, selected
+      constraint_repo = generate_constraint_repo(selected_values, selected)
+      terms = {}
+      constraint_repo.each_pair do |key, values|
+        raise "Unable to select value for constraint '#{key}'" if values.empty?
+        terms[key] = values.sample
+      end
+      Piece.new(object, terms)
     end
 
     def generate_constraint_repo selected_values, selected
@@ -195,12 +203,12 @@ module Logigram
           if selected
             repo[c.name] = [selected_values[c.name]]
           elsif c.name == fixed_term
-            repo[c.name] = limit_available_values(c, selected_values[fixed_term], selected)
+            repo[c.name] = limit_available_values(c, selected_values[fixed_term])
           else
-            repo[c.name] = limit_available_values(c, nil, selected)
+            repo[c.name] = limit_available_values(c, nil)
           end
         else
-          repo[c.name] = limit_available_values(c, nil, selected)
+          repo[c.name] = limit_available_values(c, nil)
         end
       end
       repo
@@ -209,8 +217,8 @@ module Logigram
     # @param constraint [Constraint]
     # @param exception [String]
     # @return [Array<String>]
-    def limit_available_values constraint, exception, selected
-      available = (selected ? constraint.reserves : constraint.values) - [exception]
+    def limit_available_values constraint, exception
+      available = constraint.values - [exception]
       filtered = available - pieces.map { |p| p.value(constraint.name) }
       filtered.empty? ? available : filtered
     end
