@@ -173,7 +173,6 @@ module Logigram
         selected_values[term] = c.reserves.sample
       end
       @solution = generate_piece(selected_object, selected_values, true)
-      @object_pieces[selected_object] = @solution
       objects.each do |o|
         @object_pieces[o] = if o == selected_object
           @solution
