@@ -138,7 +138,7 @@ module Logigram
     #
     # @return [Array<String>]
     def solution_predicates
-      @solution_terms.map { |t| contraint(t).predicate(@solution.value(t)) }
+      @solution_terms.map { |t| constraint(t).predicate(@solution.value(t)) }
     end
 
     # Shortcut to get the solution term's predicate, e.g., "is red"

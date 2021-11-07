@@ -26,9 +26,10 @@ module Logigram
     # @return [Array<Constraint>]
     def shuffled_constraints
       @shuffled_constraints ||= begin
-        other = (@puzzle.constraints - [@puzzle.constraint(@puzzle.solution_term)]).shuffle
+        solution_constraints = @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
+        other = (@puzzle.constraints - solution_constraints).shuffle
         first = other.shift
-        [first] + (other + [@puzzle.constraint(@puzzle.solution_term)]).shuffle
+        [first] + (other + solution_constraints).shuffle
       end
     end
 
