@@ -199,12 +199,12 @@ module Logigram
           if selected
             repo[c.name] = [selected_values[c.name]]
           elsif c.name == fixed_term
-            repo[c.name] = limit_available_values(c, selected_values[fixed_term])
+            repo[c.name] = limit_available_values(c, selected_values[fixed_term], selected)
           else
-            repo[c.name] = limit_available_values(c, nil)
+            repo[c.name] = limit_available_values(c, nil, selected)
           end
         else
-          repo[c.name] = limit_available_values(c, nil)
+          repo[c.name] = limit_available_values(c, nil, selected)
         end
       end
       repo
@@ -213,8 +213,8 @@ module Logigram
     # @param constraint [Constraint]
     # @param exception [String]
     # @return [Array<String>]
-    def limit_available_values constraint, exception
-      available = constraint.values - [exception]
+    def limit_available_values constraint, exception, selected
+      available = (selected ? constraint.reserves : constraint.values) - [exception]
       filtered = available - pieces.map { |p| p.value(constraint.name) }
       filtered.empty? ? available : filtered
     end
