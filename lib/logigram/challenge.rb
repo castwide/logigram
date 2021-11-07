@@ -23,8 +23,6 @@ module Logigram
 
     private
 
-    attr_reader :shuffled_constraints
-
     def solution_constraints
       @solution_constraints ||= @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
     end
@@ -40,8 +38,8 @@ module Logigram
     end
 
     # @return [Array<Constraint>]
-    def shuffle_constraints
-      @shuffled_constraints = begin
+    def shuffled_constraints
+      @shuffled_constraints ||= begin
         fixed_constraint = unique_constraints.sample || solution_constraints.sample
         other = (@puzzle.constraints - [fixed_constraint]).shuffle
         first = other.shift
@@ -71,7 +69,6 @@ module Logigram
 
     # @return [void]
     def generate_premises
-      shuffle_constraints
       last_constraint = nil
       shuffled_constraints[0..-2].each do |constraint|
         last_constraint = nil if solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
