@@ -27,9 +27,10 @@ module Logigram
     def shuffled_constraints
       @shuffled_constraints ||= begin
         solution_constraints = @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
-        other = (@puzzle.constraints - solution_constraints).shuffle
+        fixed_constraint = solution_constraints.sample
+        other = (@puzzle.constraints - [fixed_constraint]).shuffle
         first = other.shift
-        [first] + (other + solution_constraints).shuffle
+        [first] + (other + [fixed_constraint]).shuffle
       end
     end
 
@@ -90,7 +91,8 @@ module Logigram
 
     # @param piece [Logigram::Piece]
     # @param constraint [Logigram::Constraint]
-    # @param force [Symbol] :affirmative, :negative, :random
+    # @param identifier [Logigram::Constraint]
+    # @param affirm [Symbol] :affirmative, :negative, :random
     def generate_premise piece, constraint, identifier, affirm
       value = case affirm
       when :affirmative
@@ -100,9 +102,16 @@ module Logigram
       else
         sample_value(constraint.name)
       end
-      # value = affirm ? piece.value(constraint.name) : sample_value(constraint.name)
       remove_value constraint.name, value
-      Logigram::Premise.new(piece, constraint, value, identifier)
+      Logigram::Premise.new(piece, constraint, value, clarify(piece, identifier))
+    end
+
+    # @param piece [Piece]
+    # @param identifier [Constraint]
+    def clarify piece, identifier
+      return nil unless identifier
+      total = @puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
+      return nil if total.length > 1
     end
   end
 end
