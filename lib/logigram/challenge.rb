@@ -76,16 +76,12 @@ module Logigram
       shuffle_constraints
       last_constraint = nil
       shuffled_constraints[0..-2].each do |constraint|
+        last_constraint = nil if solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
         shuffled_pieces = @puzzle.pieces.shuffle
         shuffled_pieces[0..-2].each_with_index do |piece, index|
           @clues.push generate_premise(piece, constraint, last_constraint, affirmation_at(index))
         end
-        # last_constraint = constraint
-        last_constraint = if solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
-          nil
-        else
-          constraint
-        end
+        last_constraint = constraint
       end
       (@puzzle.pieces - [@puzzle.solution]).shuffle.each_with_index do |piece, index|
         @clues.push generate_premise(piece, shuffled_constraints.last, last_constraint, affirmation_at(index))
