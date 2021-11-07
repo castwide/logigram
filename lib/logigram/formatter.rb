@@ -39,7 +39,7 @@ module Logigram
 
     def fix_article(value)
       return value unless @subject.include?('the %{value}')
-      value.sub(/^(a|an) %\{value\}/, '')
+      value.sub(/^(a|an) /, '')
     end
   end
 
