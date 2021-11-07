@@ -107,11 +107,11 @@ module Logigram
     end
 
     # @param piece [Piece]
-    # @param identifier [Constraint]
+    # @param identifier [Constraint, nil]
     def clarify piece, identifier
       return nil unless identifier
       total = @puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
-      return nil if total.length > 1
+      total.length > 1 ? nil : identifier
     end
   end
 end
