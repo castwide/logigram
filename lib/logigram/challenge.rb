@@ -30,10 +30,9 @@ module Logigram
     # @return [Array<Constraint>]
     def unique_constraints
       @unique_constraints ||= begin
-        statistics = Statistics.new(@puzzle)
         solution_constraints.select do |con|
           value = @puzzle.solution.value(con.name)
-          statistics.raw_data[con.name][value] == 1
+          @puzzle.pieces.select { |p| p.value(con.name) == value}.one?
         end
       end
     end
@@ -72,7 +71,6 @@ module Logigram
     def generate_premises
       last_constraint = nil
       sorted_constraints[0..-2].each do |constraint|
-        # next if last_constraint && solution_constraints.include?(constraint) && !unique_constraints.include?(constraint)
         shuffled_pieces = @puzzle.pieces.shuffle
         shuffled_pieces[0..-2].each_with_index do |piece, index|
           @clues.push generate_premise(piece, constraint, last_constraint, affirmation_at(index))
