@@ -34,6 +34,6 @@ RSpec.describe Logigram::Constraint do
   it 'throws an error for invalid reserves' do
     expect {
       Logigram::Constraint.new('color', ['red', 'blue'], reserve: 'green')
-    }.to raise_error(Logigram::Constraint::SelectionError)
+    }.to raise_error(ArgumentError)
   end
 end

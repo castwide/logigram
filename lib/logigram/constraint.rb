@@ -5,16 +5,27 @@ module Logigram
   # constraint.
   #
   class Constraint
-    class SelectionError < ArgumentError; end
+    # @return [String]
+    attr_reader :name
 
-    attr_reader :name, :values, :reserves
+    # All possible values for the constraint
+    #
+    # @return [Array<String>]
+    attr_reader :values
+
+    # The subset of values that can be applied to solutions. When a puzzle
+    # generates a solution, its value for the constraint should be one of the
+    # reserves. (By default, reserves are all possible values.)
+    #
+    # @return [Array<String>]
+    attr_reader :reserves
 
     # @param name [String]
-    # @param values [Array]
-    # @param subject [String, nil]
-    # @param predicate [String, nil]
-    # @param negative [String, nil]
-    # @param reserve [Object, Array<Object>, nil]
+    # @param values [Array] All possible values for the constraint
+    # @param subject [String, nil] The format string for the subject's common noun
+    # @param predicate [String, nil] The format string for the verbal predicate
+    # @param negative [String, nil] The format string for negative predicates
+    # @param reserve [Object, Array<Object>, nil] Values to reserve for solutions
     def initialize name, values, subject: nil, predicate: nil, negative: nil, reserve: nil
       @name = name
       @values = values
@@ -48,32 +59,18 @@ module Logigram
 
     private
 
+    # @raise [ArgumentError] if the value is not valid
+    # @param value [String]
+    # @return [String]
     def validate value
-      return if values.include?(value)
+      return value if values.include?(value)
       raise ArgumentError, "Constraint for #{name} received invalid value #{value}"
     end
 
+    # @param reserve [String, Array<Sting>, nil]
     def configure_reserves(reserve)
       return values unless reserve
-      if reserve.is_a?(Array)
-        validate_reserves(reserve)
-        reserve
-      else
-        validate_reserve(reserve)
-        [reserve]
-      end
-    end
-
-    # @param ary [Array<Object>]
-    # @return [void]
-    def validate_reserves ary
-      ary.each { |v| validate_reserve(v) }
-    end
-
-    # @param val [Object]
-    # @return [void]
-    def validate_reserve val
-      raise SelectionError, "Selection '#{val} is not a valid value" unless values.include?(val)
+      [reserve].flatten.map { |v| validate(v) }
     end
   end
 end
