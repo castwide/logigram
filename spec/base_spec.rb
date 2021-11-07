@@ -75,4 +75,27 @@ RSpec.describe Logigram::Base do
     puzzle = klass.new(['dog', 'cat'])
     expect(puzzle.solution.value('color')).to eq('blue')
   end
+
+  it 'supports multiple terms' do
+    klass = Class.new(Logigram::Base) do
+      constrain 'color', ['red', 'green', 'blue']
+      constrain 'size', ['small', 'medium', 'large']
+      constrain 'height', ['short', 'average', 'tall']
+    end
+    # @type [Logigram::Base]
+    puzzle = klass.new(['dog', 'cat'], terms: ['color', 'size'])
+    expect(puzzle.solution_terms).to eq(['color', 'size'])
+  end
+
+  it 'allows duplicate values' do
+    klass = Class.new(Logigram::Base) do
+      constrain 'color', ['red', 'green']
+    end
+    # @type [Logigram::Base]
+    puzzle = klass.new(['pencil', 'pen', 'crayon'])
+    answer = puzzle.solution.value('color')
+    (puzzle.pieces - [puzzle.solution]).each do |piece|
+      expect(piece.value('color')).not_to eq(answer)
+    end
+  end
 end

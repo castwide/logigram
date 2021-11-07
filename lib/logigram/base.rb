@@ -69,14 +69,14 @@ module Logigram
 
     # Generate a puzzle with the provided configuration.
     #
-    # The `objects` array is required. If `solution` and `term` are not provided, they'll be randomly generated.
+    # The `objects` array is required. If `solution` and `terms` are not provided, they'll be randomly generated.
     #
     # @param objects [Array<Object>] The piece identifiers
     # @param solution [Object, nil] Which object to use as the solution
-    # @param term [String, nil] The solution term
-    def initialize objects, solution: nil, term: nil
+    # @param terms [String, Array<String>, nil] The solution term(s)
+    def initialize objects, solution: nil, terms: nil
       @object_pieces = {}
-      @solution_term = term || constraints.map(&:name).sample
+      @solution_terms = terms ? [terms].flatten : [constraints.map(&:name).sample]
       generate_pieces objects, (solution || objects.sample)
     end
 
@@ -108,23 +108,45 @@ module Logigram
 
     # The term that should be used to identify the solution.
     #
-    # @return [String]
-    def solution_term
-      @solution_term
+    # @return [Array<String>]
+    def solution_terms
+      @solution_terms
     end
 
-    # Shortcut to get the solution tern's value, e.g., "red"
+    def solution_term
+      raise RuntimeError, 'Use `solution_terms` when there is more than one term' unless @solution_terms.length == 1
+      @solution_terms.first
+    end
+
+    # Shortcut to get the solution terms' values, e.g., "red"
     #
+    # @return [Array<String>]
+    def solution_values
+      @solution_terms.map { |t| @solution.value(t) }
+    end
+
+    # Shortcut to get the solution term's value, e.g., "red"
+    #
+    # @raise [RuntimeError] if there is more than one solution term
     # @return [String]
     def solution_value
-      @solution.value(@solution_term)
+      raise RuntimeError, 'Use `solution_values` when there is more than one term' unless @solution_terms.length == 1
+      @solution.value(@solution_terms.first)
+    end
+
+    # Shortcut to get the solution terms' predicates, e.g., "is red"
+    #
+    # @return [Array<String>]
+    def solution_predicates
+      @solution_terms.map { |t| constraint(t).predicate(@solution.value(t)) }
     end
 
     # Shortcut to get the solution term's predicate, e.g., "is red"
     #
     # @return [String]
     def solution_predicate
-      constraint(@solution_term).predicate(@solution.value(@solution_term))
+      raise RuntimeError, 'Use `solution_predicates` when there is more than one term' unless @solution_terms.length == 1
+      constraint(@solution_terms.first).predicate(@solution.value(@solution_terms.first))
     end
 
     # @return [Array<Logigram::Piece>]
@@ -148,22 +170,53 @@ module Logigram
     # @param solution [#to_s, nil]
     # @return [void]
     def generate_pieces objects, solution
-      selected = solution || objects.sample
-      repo = generate_constraint_repo
-      objects.each { |o| insert o, o == selected, repo }
+      selected_object = solution || objects.sample
+      selected_values = {}
+      solution_terms.each do |term|
+        c = constraint(term)
+        selected_values[term] = c.reserves.sample
+      end
+      objects.each do |o|
+        constraint_repo = generate_constraint_repo(selected_values, o == selected_object)
+        terms = {}
+        constraint_repo.each_pair do |key, values|
+          raise "Unable to select value for constraint '#{key}'" if values.empty?
+          terms[key] = values.sample
+        end
+        piece = Piece.new(o, terms)
+        @solution = piece if o == selected_object
+        @object_pieces[o] = piece
+      end
     end
 
-    def insert object, selected, repo
-      terms = {}
-      # @param c [Constraint]
+    def generate_constraint_repo selected_values, selected
+      repo = {}
+      # Setting a fixed term ensures that at least one solution term will not
+      # be duplicated by another piece
+      fixed_term = selected_values.keys.sample
       constraints.each do |c|
-        pick = selected ? repo[c.name][:answer] : repo[c.name][:others].pop
-        raise "Unable to select value for constraint '#{c.name}'" if pick.nil?
-        terms[c.name] = pick
+        if selected_values.key?(c.name)
+          if selected
+            repo[c.name] = [selected_values[c.name]]
+          elsif c.name == fixed_term
+            repo[c.name] = limit_available_values(c, selected_values[fixed_term])
+          else
+            repo[c.name] = limit_available_values(c, nil)
+          end
+        else
+          repo[c.name] = limit_available_values(c, nil)
+        end
       end
-      p = Piece.new(object, terms)
-      @solution = p if selected
-      @object_pieces[object] = p
+      repo
+    end
+
+    # @param constraint [Constraint]
+    # @param exception [String]
+    # @return [Array<String>]
+    def limit_available_values constraint, exception
+      available = constraint.values - [exception]
+      filtered = available - pieces.map { |p| p.value(constraint.name) }
+      filtered.empty? ? available : filtered
     end
 
     # Create an array of all possible premises for the puzzle.
@@ -198,18 +251,6 @@ module Logigram
         end
       end
       result
-    end
-
-    def generate_constraint_repo
-      r = {}
-      constraints.each do |constraint|
-        answer = constraint.reserves.sample
-        r[constraint.name] = {
-          answer: answer,
-          others: (constraint.values - [answer]).shuffle
-        }
-      end
-      r
     end
   end
 end
