@@ -106,7 +106,7 @@ module Logigram
       constraint(key).values & pieces.map { |p| p.value(key) }
     end
 
-    # The term that should be used to identify the solution.
+    # The terms that should be used to identify the solution.
     #
     # @return [Array<String>]
     def solution_terms
