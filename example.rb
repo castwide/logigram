@@ -3,9 +3,11 @@
 require 'logigram'
 
 class Puzzle < Logigram::Base
+  formatter = Logigram::Formatter.new(subject: 'the %{value} animal')
+
   # Apply constraints that will be used to generate the puzzle's premises
-  constrain 'color', ['red', 'green', 'blue'], subject: 'the %{value} animal'
-  constrain 'size', ['small', 'medium', 'large'], subject: 'the %{value} animal'
+  constrain 'color', ['red', 'green', 'blue'], formatter: formatter
+  constrain 'size', ['small', 'medium', 'large'], formatter: formatter
 end
 
 # Create a new puzzle with three pieces. If a `solution` is not specified, the
