@@ -1,15 +1,13 @@
+require 'logigram/formatter/conjugations'
+
 module Logigram
   class Formatter
-    CONJUGATIONS = {
-      be: ['is', 'are', 'is not', 'are not'],
-      have: ['has', 'have', 'does not have', 'do not have']
-    }
-
-    attr_reader :verb
-
+    # @param subject [String]
+    # @param plural [String]
+    # @param verb [Symbol, Array<String>]
+    # @param descriptor [String]
     def initialize subject: 'the %{value} thing', plural: "#{subject}s", verb: :be, descriptor: '%{value}'
-      raise ArgumentError, "Unrecognized verb #{verb}" unless CONJUGATIONS.key?(verb)
-      @verb = verb
+      @conjugations = validate_verb(verb)
       @subject = subject
       @plural = plural
       @descriptor = descriptor
@@ -30,16 +28,26 @@ module Logigram
     private
 
     def predicate_verb amount
-      amount == 1 ? CONJUGATIONS[verb][0] : CONJUGATIONS[verb][1]
+      amount == 1 ? @conjugations[0] : @conjugations[1]
     end
 
     def negative_verb amount
-      amount == 1 ? CONJUGATIONS[verb][2] : CONJUGATIONS[verb][3]
+      amount == 1 ? @conjugations[2] : @conjugations[3]
     end
 
     def fix_article(value)
       return value unless @subject.include?('the %{value}')
-      value.sub(/^(a|an) /, '')
+      value.to_s.sub(/^(a|an) /, '')
+    end
+
+    def validate_verb verb
+      CONJUGATIONS[verb] ||
+        validate_conjugation(verb) ||
+        raise(ArgumentError, 'Verb must be a predefined infinitive or an array of verb forms')
+    end
+
+    def validate_conjugation verb
+      return verb if verb.is_a?(Array) && verb.length == 4
     end
   end
 
