@@ -16,10 +16,6 @@ module Logigram
       @statements ||= generate_statements
     end
 
-    def to_s
-      statements.join("\n")
-    end
-
     private
 
     def noun qty
