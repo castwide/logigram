@@ -40,4 +40,18 @@ RSpec.describe Logigram::Formatter do
     expect(formatter.predicate('candy')).to eq('has candy in it')
     expect(formatter.negative('candy')).to eq('does not have candy in it')
   end
+
+  it 'uses arbitrary verbs' do
+    formatter = Logigram::Formatter.new(verb: ['contains', 'contain', 'does not contain', 'do not contain'])
+    expect(formatter.predicate('candy')).to eq('contains candy')
+    expect(formatter.predicate('candy', 2)).to eq('contain candy')
+    expect(formatter.negative('candy')).to eq('does not contain candy')
+    expect(formatter.negative('candy', 2)).to eq('do not contain candy')
+  end
+
+  it 'raises argument errors for invalid verb arrays' do
+    expect {
+      Logigram::Formatter.new(verb: ['not', 'enough', 'strings'])
+    }.to raise_error(ArgumentError)
+  end
 end
