@@ -98,4 +98,29 @@ RSpec.describe Logigram::Base do
       expect(piece.value('color')).not_to eq(answer)
     end
   end
+
+  it 'sets unique solution terms' do
+    # @type [Class<Logigram::Base>]
+    klass = Class.new(Logigram::Base) do
+      constrain 'color', ['red', 'green']
+    end
+    # This should succeed because the solution term can always be unique, even
+    # though the other two terms will always be the same. For example, if the
+    # solution piece is red, the other pieces will both be green.
+    puzzle = klass.new(['pencil', 'pen', 'crayon'])
+    solution = puzzle.solution_value
+    matches = puzzle.pieces.select { |piece| piece.value('color') == solution }
+    expect(matches).to be_one
+  end
+
+  it 'raises errors for insufficient constraint values' do
+    klass = Class.new(Logigram::Base) do
+      constrain 'color', ['red']
+    end
+    expect {
+      # This should fail because the solution term requires a unique value, but
+      # all three pieces will be red.
+      klass.new(['pencil', 'pen', 'crayon'])
+    }.to raise_error(RuntimeError)
+  end
 end
