@@ -70,9 +70,11 @@ module Logigram
     # @param objects [Array<Object>] The piece identifiers
     # @param solution [Object, nil] Which object to use as the solution
     # @param terms [String, Array<String>, nil] The solution term(s)
-    def initialize objects, solution: nil, terms: nil
+    # @param recur [String, Array<String>, nil] Recurring constraints (uniqueness never enforced)
+    def initialize objects, solution: nil, terms: nil, recur: nil
       @object_pieces = {}
       @solution_terms = terms ? [terms].flatten : [constraints.map(&:name).sample]
+      @recur = recur ? [recur].flatten : []
       generate_pieces objects, (solution || objects.sample)
     end
 
@@ -169,8 +171,7 @@ module Logigram
       selected_object = solution || objects.sample
       selected_values = {}
       solution_terms.each do |term|
-        c = constraint(term)
-        selected_values[term] = c.reserves.sample
+        selected_values[term] = constraint(term).reserves.sample
       end
       @solution = generate_piece(selected_object, selected_values, true)
       objects.each do |o|
@@ -182,6 +183,10 @@ module Logigram
       end
     end
 
+    # @param object [Object]
+    # @param selected_values [Hash]
+    # @param selected [Boolean]
+    # @return [Piece]
     def generate_piece object, selected_values, selected
       constraint_repo = generate_constraint_repo(selected_values, selected)
       terms = {}
@@ -192,22 +197,25 @@ module Logigram
       Piece.new(object, terms)
     end
 
+    # @param selected_values [Hash]
+    # @param selected [Boolean]
+    # @return [Hash]
     def generate_constraint_repo selected_values, selected
       repo = {}
       # Setting a fixed term ensures that at least one solution term will not
       # be duplicated by another piece
       fixed_term = selected_values.keys.sample
       constraints.each do |c|
-        if selected_values.key?(c.name)
+        repo[c.name] = if selected_values.key?(c.name)
           if selected
-            repo[c.name] = [selected_values[c.name]]
+            [selected_values[c.name]]
           elsif c.name == fixed_term
-            repo[c.name] = limit_available_values(c, selected_values[fixed_term], selected)
+            limit_available_values(c, selected_values[fixed_term], selected)
           else
-            repo[c.name] = limit_available_values(c, nil, false)
+            limit_available_values(c, nil, false)
           end
         else
-          repo[c.name] = limit_available_values(c, nil, selected)
+          limit_available_values(c, nil, selected)
         end
       end
       repo
@@ -215,10 +223,13 @@ module Logigram
 
     # @param constraint [Constraint]
     # @param exception [String]
+    # @param selected [Boolean]
     # @return [Array<String>]
     def limit_available_values constraint, exception, selected
       available = (selected ? constraint.reserves : constraint.values) - [exception]
-      filtered = available - [@solution&.value(constraint.name)] - pieces.map { |p| p.value(constraint.name) }
+      filtered = available -
+        [@solution&.value(constraint.name)] -
+        (@recur.include?(constraint.name) ? [] : pieces.map { |p| p.value(constraint.name) })
       filtered.empty? ? available : filtered
     end
 
