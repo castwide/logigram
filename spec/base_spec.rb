@@ -55,6 +55,7 @@ RSpec.describe Logigram::Base do
     puzzle = klass.new(['dog'])
     expect(puzzle.solution_term).to eq('color')
     expect(puzzle.solution_predicate).to eq('is red')
+    expect(puzzle.solution_predicates).to eq(['is red'])
   end
 
   it 'sets a random solution term' do
@@ -111,6 +112,7 @@ RSpec.describe Logigram::Base do
     solution = puzzle.solution_value
     matches = puzzle.pieces.select { |piece| piece.value('color') == solution }
     expect(matches).to be_one
+    expect(puzzle.solution_values).to eq([solution])
   end
 
   it 'raises errors for insufficient constraint values' do
@@ -122,5 +124,29 @@ RSpec.describe Logigram::Base do
       # all three pieces will be red.
       klass.new(['pencil', 'pen', 'crayon'])
     }.to raise_error(RuntimeError)
+  end
+
+  it 'selects pieces by object' do
+    object_klass = Class.new do
+      def initialize name
+        @name = name
+      end
+
+      def to_s
+        @name
+      end
+    end
+
+    obj1 = object_klass.new('Bob')
+    obj2 = object_klass.new('Joe')
+
+    puzzle_klass = Class.new(Logigram::Base) do
+      constrain 'height', ['short', 'tall']
+    end
+
+    puzzle = puzzle_klass.new([obj1, obj2])
+
+    expect(puzzle.piece_for(obj1).name).to eq('Bob')
+    expect(puzzle.piece_for(obj2).name).to eq('Joe')
   end
 end
