@@ -1,6 +1,16 @@
 require 'logigram/formatter/conjugations'
 
 module Logigram
+  # Rules for generating premise statements.
+  #
+  # @example Use the default rules, but refer to pieces as "objects" instead of "things"
+  #   Formatter.new(subject: 'the %{value} object')
+  #   # Example premise: "the green object is large"
+  #
+  # @example Use the default rules, except make the "be" conjugations past tense
+  #   Formatter.new(verb: ['was', 'were', 'was not', 'were not'])
+  #   # Example premise: "the red thing was small"
+  #
   class Formatter
     # @param subject [String]
     # @param plural [String]
