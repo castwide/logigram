@@ -1,4 +1,6 @@
 module Logigram
+  # A data summary about the pieces and premises of a puzzle.
+  #
   class Statistics
     def initialize puzzle, subject: 'thing', plural: "#{subject}s"
       @puzzle = puzzle
