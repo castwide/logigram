@@ -3,6 +3,7 @@
 require 'logigram'
 
 class Puzzle < Logigram::Base
+  # Create a formatter that refers to pieces as "animals" instead of "things"
   formatter = Logigram::Formatter.new(subject: 'the %{value} animal')
 
   # Apply constraints that will be used to generate the puzzle's premises
