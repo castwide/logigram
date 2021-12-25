@@ -4,8 +4,8 @@ module Logigram
   #
   # @example
   #   class Puzzle < Logigram::Base
-  #     constrain 'color', ['red', 'green', 'blue'], subject: 'the %{value} thing'
-  #     constrain 'size', ['small', 'medium', 'large'], subject: 'the %{value} thing'
+  #     constrain 'color', ['red', 'green', 'blue']
+  #     constrain 'size', ['small', 'medium', 'large']
   #   end
   #
   class Base
