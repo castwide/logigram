@@ -1,6 +1,9 @@
 module Logigram
   # A data summary about the pieces and premises of a puzzle.
   #
+  # @param puzzle [Logigram::Base]
+  # @param subject [String]
+  # @param plural [String]
   class Statistics
     def initialize puzzle, subject: 'thing', plural: "#{subject}s"
       @puzzle = puzzle
@@ -8,10 +11,12 @@ module Logigram
       @plural = plural
     end
 
+    # @return [Hash]
     def raw_data
       @raw_data ||= generate_statistics
     end
 
+    # @return [Array<String>]
     def statements
       @statements ||= generate_statements
     end
