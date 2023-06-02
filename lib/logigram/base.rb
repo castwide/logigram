@@ -58,6 +58,7 @@ module Logigram
 
       private
 
+      # @return [Hash<String, Constraint>]
       def constraint_map
         @constraint_map ||= {}
       end

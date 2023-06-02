@@ -50,12 +50,14 @@ module Logigram
       value.to_s.sub(/^(a|an) /, '')
     end
 
+    # @return [Array<String>]
     def validate_verb verb
       CONJUGATIONS[verb] ||
         validate_conjugation(verb) ||
         raise(ArgumentError, 'Verb must be a predefined infinitive or an array of verb forms')
     end
 
+    # @return [Array<String>]
     def validate_conjugation verb
       return verb if verb.is_a?(Array) && verb.length == 4
     end
