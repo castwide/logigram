@@ -18,14 +18,14 @@ module Logigram
     # @return [String]
     attr_reader :value
 
-    # @return [Constraint]
+    # @return [Constraint, nil]
     attr_reader :identifier
 
     # @param piece [Piece]
     # @param constraint [Constraint]
     # @param value [String]
     # @param identifier [Constraint, nil]
-    def initialize piece, constraint, value, identifier = nil
+    def initialize(piece, constraint, value, identifier = nil)
       @piece = piece
       @constraint = constraint
       @identifier = identifier
@@ -87,10 +87,10 @@ module Logigram
     # @return [String]
     def subject
       @subject ||= if identifier.nil?
-        piece.name
-      else
-        identifier.subject(piece.value(identifier.name))
-      end
+                     piece.name
+                   else
+                     identifier.subject(piece.value(identifier.name))
+                   end
     end
 
     # A human-readable representation of the premise, e.g., "The dog is red."
@@ -98,10 +98,10 @@ module Logigram
     # @return [String]
     def text
       @text ||= if affirmative?
-        "#{subject} #{constraint.predicate(value)}"
-      else
-        "#{subject} #{constraint.negative(value)}"
-      end
+                  "#{subject} #{constraint.predicate(value)}"
+                else
+                  "#{subject} #{constraint.negative(value)}"
+                end
     end
 
     def to_s

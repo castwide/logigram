@@ -31,7 +31,7 @@ module Logigram
       #
       # @param name [String]
       # @return [Constraint, nil]
-      def constraint name
+      def constraint(name)
         constraint_map[name]
       end
 
@@ -52,7 +52,7 @@ module Logigram
       # @param reserve [Object, Array<Object>, nil] Require the solution to be one of these values
       # @param formatter [Formatter] Formatting rules for generated premises
       # @return [Logigram::Constraint] The newly created constraint
-      def constrain name, values, reserve: nil, formatter: Formatter::DEFAULT
+      def constrain(name, values, reserve: nil, formatter: Formatter::DEFAULT)
         constraint_map[name] = Constraint.new(name, values, reserve: reserve, formatter: formatter)
       end
 
@@ -69,14 +69,15 @@ module Logigram
     # The `objects` array is required. If `solution` and `terms` are not provided, they'll be randomly generated.
     #
     # @param objects [Array<Object>] The piece identifiers
-    # @param solution [Object, nil] Which object to use as the solution
+    # @param solution [Object] Which object to use as the solution
     # @param terms [String, Array<String>, nil] The solution term(s)
     # @param recur [String, Array<String>, nil] Recurring constraints (uniqueness never enforced)
-    def initialize objects, solution: nil, terms: nil, recur: nil
+    def initialize(objects, solution: objects.sample, terms: nil, recur: nil)
       @object_pieces = {}
       @solution_terms = terms ? [terms].flatten : [constraints.map(&:name).sample]
       @recur = recur ? [recur].flatten : []
-      generate_pieces objects, (solution || objects.sample)
+      objects.push solution unless objects.include?(solution)
+      generate_pieces objects, solution
     end
 
     # @return [Array<Premise>]
@@ -91,7 +92,7 @@ module Logigram
 
     # @param name [String]
     # @return [Constraint, nil]
-    def constraint name
+    def constraint(name)
       self.class.constraint name
     end
 
@@ -99,21 +100,20 @@ module Logigram
     # This method will only include values that are currently assigned to pieces.
     #
     # @return [Array<Object>]
-    def term_values key
+    def term_values(key)
       # Use an intersection to retain the order in which the values were
       # assigned to the constraint
-      constraint(key).values & pieces.map { |p| p.value(key) }
+      constraint(key).values & pieces.map { |piece| piece.value(key) }
     end
 
     # The terms that should be used to identify the solution.
     #
     # @return [Array<String>]
-    def solution_terms
-      @solution_terms
-    end
+    attr_reader :solution_terms
 
     def solution_term
-      raise RuntimeError, 'Use `solution_terms` when there is more than one term' unless @solution_terms.length == 1
+      raise 'Use `solution_terms` when there is more than one term' unless @solution_terms.one?
+
       @solution_terms.first
     end
 
@@ -129,7 +129,8 @@ module Logigram
     # @raise [RuntimeError] if there is more than one solution term
     # @return [String]
     def solution_value
-      raise RuntimeError, 'Use `solution_values` when there is more than one term' unless @solution_terms.length == 1
+      raise 'Use `solution_values` when there is more than one term' unless @solution_terms.one?
+
       @solution.value(@solution_terms.first)
     end
 
@@ -144,7 +145,8 @@ module Logigram
     #
     # @return [String]
     def solution_predicate
-      raise RuntimeError, 'Use `solution_predicates` when there is more than one term' unless @solution_terms.length == 1
+      raise 'Use `solution_predicates` when there is more than one term' unless @solution_terms.one?
+
       constraint(@solution_terms.first).predicate(@solution.value(@solution_terms.first))
     end
 
@@ -157,7 +159,7 @@ module Logigram
     #
     # @param object [Object] The object used to generate the piece
     # @return [Logigram::Piece]
-    def piece_for object
+    def piece_for(object)
       @object_pieces[object]
     end
 
@@ -165,22 +167,21 @@ module Logigram
 
     # Generate the puzzle pieces.
     #
-    # @param objects [Array<#to_s>]
-    # @param solution [#to_s, nil]
+    # @param objects [Array<Object>]
+    # @param solution [Object]
     # @return [void]
-    def generate_pieces objects, solution
-      selected_object = solution || objects.sample
+    def generate_pieces(objects, solution)
       selected_values = {}
       solution_terms.each do |term|
         selected_values[term] = constraint(term).reserves.sample
       end
-      @solution = generate_piece(selected_object, selected_values, true)
+      @solution = generate_piece(solution, selected_values, true)
       objects.each do |o|
-        @object_pieces[o] = if o == selected_object
-          @solution
-        else
-          generate_piece(o, selected_values, false)
-        end
+        @object_pieces[o] = if o == solution
+                              @solution
+                            else
+                              generate_piece(o, selected_values, false)
+                            end
       end
     end
 
@@ -188,11 +189,12 @@ module Logigram
     # @param selected_values [Hash]
     # @param selected [Boolean]
     # @return [Piece]
-    def generate_piece object, selected_values, selected
+    def generate_piece(object, selected_values, selected)
       constraint_repo = generate_constraint_repo(selected_values, selected)
       terms = {}
       constraint_repo.each_pair do |key, values|
         raise "Unable to select value for constraint '#{key}'" if values.empty?
+
         terms[key] = values.sample
       end
       Piece.new(object, terms)
@@ -201,23 +203,23 @@ module Logigram
     # @param selected_values [Hash]
     # @param selected [Boolean]
     # @return [Hash]
-    def generate_constraint_repo selected_values, selected
+    def generate_constraint_repo(selected_values, selected)
       repo = {}
       # Setting a fixed term ensures that at least one solution term will not
       # be duplicated by another piece
       fixed_term = selected_values.keys.sample
       constraints.each do |c|
         repo[c.name] = if selected_values.key?(c.name)
-          if selected
-            [selected_values[c.name]]
-          elsif c.name == fixed_term
-            limit_available_values(c, selected_values[fixed_term], selected)
-          else
-            limit_available_values(c, nil, false)
-          end
-        else
-          limit_available_values(c, nil, selected)
-        end
+                         if selected
+                           [selected_values[c.name]]
+                         elsif c.name == fixed_term
+                           limit_available_values(c, selected_values[fixed_term], selected)
+                         else
+                           limit_available_values(c, nil, false)
+                         end
+                       else
+                         limit_available_values(c, nil, selected)
+                       end
       end
       repo
     end
@@ -226,11 +228,11 @@ module Logigram
     # @param exception [String]
     # @param selected [Boolean]
     # @return [Array<String>]
-    def limit_available_values constraint, exception, selected
+    def limit_available_values(constraint, exception, selected)
       available = (selected ? constraint.reserves : constraint.values) - [exception]
       filtered = available -
-        [@solution&.value(constraint.name)] -
-        (@recur.include?(constraint.name) ? [] : pieces.map { |p| p.value(constraint.name) })
+                 [@solution&.value(constraint.name)] -
+                 (@recur.include?(constraint.name) ? [] : pieces.map { |p| p.value(constraint.name) })
       filtered.empty? ? available : filtered
     end
 
@@ -245,7 +247,7 @@ module Logigram
     #
     # @param piece [Logigram::Piece]
     # @return [Array<Logigram::Premise>]
-    def generate_piece_premises piece
+    def generate_piece_premises(piece)
       result = []
       piece.terms.each do |t|
         # Positive specific

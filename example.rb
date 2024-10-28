@@ -4,7 +4,7 @@ require 'logigram'
 
 class Puzzle < Logigram::Base
   # Create a formatter that refers to pieces as "animals" instead of "things"
-  formatter = Logigram::Formatter.new(subject: 'the %{value} animal')
+  formatter = Logigram::Formatter.new(subject: 'the %<value>s animal')
 
   # Apply constraints that will be used to generate the puzzle's premises
   constrain 'color', ['red', 'green', 'blue'], formatter: formatter
@@ -24,12 +24,12 @@ puzzle.constraints.each do |c|
 end
 puts "Which animal #{puzzle.solution_predicate}?"
 
-puts "Known facts:"
+puts 'Known facts:'
 challenge.clues.each do |c|
   puts "* #{c.to_s.capitalize}"
 end
 
-print "Press enter for the solution...."
-STDIN.gets
+print 'Press enter for the solution....'
+$stdin.gets
 
-puts puzzle.solution.to_s.capitalize
+puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution_predicate}."

@@ -11,9 +11,11 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     attr_reader :clues
 
+    attr_reader :puzzle
+
     # @param puzzle [Logigram::Base]
     # @param difficulty [Symbol] :easy, :medium, :hard
-    def initialize puzzle, difficulty: :medium
+    def initialize(puzzle, difficulty: :medium)
       @puzzle = puzzle
       @clues = []
       @term_values = {}
@@ -29,11 +31,9 @@ module Logigram
 
     # @return [Array<Constraint>]
     def unique_constraints
-      @unique_constraints ||= begin
-        solution_constraints.select do |con|
-          value = @puzzle.solution.value(con.name)
-          @puzzle.pieces.select { |p| p.value(con.name) == value}.one?
-        end
+      @unique_constraints ||= solution_constraints.select do |con|
+        value = @puzzle.solution.value(con.name)
+        @puzzle.pieces.select { |p| p.value(con.name) == value }.one?
       end
     end
 
@@ -52,7 +52,7 @@ module Logigram
     # @param term [String]
     # @param value [String]
     # @return [void]
-    def remove_value term, value
+    def remove_value(term, value)
       @term_values[term] ||= @puzzle.term_values(term)
       @term_values[term].delete value
     end
@@ -61,7 +61,7 @@ module Logigram
     #
     # @param term [String]
     # @param except [String, nil]
-    def sample_value term, except: nil
+    def sample_value(term, except: nil)
       @term_values[term] ||= @puzzle.term_values(term)
       # Try to eliminate the exception but allow it if it's the only option
       (@term_values[term] - [except]).sample || @term_values[term].sample
@@ -85,7 +85,7 @@ module Logigram
 
     # @param index [Integer]
     # @return [Symbol]
-    def affirmation_at index
+    def affirmation_at(index)
       if @difficulty == :easy
         :affirmative
       elsif @difficulty == :medium
@@ -107,23 +107,24 @@ module Logigram
     # @param constraint [Logigram::Constraint]
     # @param identifier [Logigram::Constraint]
     # @param affirm [Symbol] :affirmative, :negative, :random
-    def generate_premise piece, constraint, identifier, affirm
+    def generate_premise(piece, constraint, identifier, affirm)
       value = case affirm
-      when :affirmative
-        piece.value(constraint.name)
-      when :negative
-        sample_value(constraint.name, except: piece.value(constraint.name))
-      else
-        sample_value(constraint.name)
-      end
+              when :affirmative
+                piece.value(constraint.name)
+              when :negative
+                sample_value(constraint.name, except: piece.value(constraint.name))
+              else
+                sample_value(constraint.name)
+              end
       remove_value constraint.name, value
       Logigram::Premise.new(piece, constraint, value, clarify(piece, identifier))
     end
 
     # @param piece [Piece]
     # @param identifier [Constraint, nil]
-    def clarify piece, identifier
+    def clarify(piece, identifier)
       return nil unless identifier
+
       total = @puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
       total.length == 1 ? identifier : nil
     end
