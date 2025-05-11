@@ -20,7 +20,7 @@ module Logigram
 
     # @param constraints [Array<Constraint>]
     # @param objects [Array<Object>]
-    # @param terms [Array<Constraint>]
+    # @param terms [Constraint, Array<Constraint>]
     # @param selection [Object]
     def initialize(constraints:, objects:, terms: constraints.sample, selection: objects.sample)
       @constraints = constraints
@@ -33,6 +33,14 @@ module Logigram
     # @return [Array<Premise>]
     def premises
       @premises ||= generate_all_premises
+    end
+
+    # Get the piece associated with an object.
+    #
+    # @param object [Object] The object used to generate the piece
+    # @return [Piece]
+    def piece_for(object)
+      pieces.find { |piece| piece.object == object }
     end
 
     private

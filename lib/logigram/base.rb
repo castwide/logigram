@@ -77,13 +77,5 @@ module Logigram
     def constraint(name)
       self.class.constraint name
     end
-
-    # Get the piece associated with an object.
-    #
-    # @param object [Object] The object used to generate the piece
-    # @return [Logigram::Piece]
-    def piece_for(object)
-      pieces.find { |piece| piece.object == object }
-    end
   end
 end
