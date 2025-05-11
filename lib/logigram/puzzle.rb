@@ -32,11 +32,6 @@ module Logigram
       @pieces, @solution = Piece::Factory.make(@constraints, @determinants, objects, selection)
     end
 
-    # @return [Array<Premise>]
-    def premises
-      @premises ||= generate_all_premises
-    end
-
     # Get the piece associated with an object.
     #
     # @param object [Object] The object used to generate the piece
@@ -49,43 +44,6 @@ module Logigram
     # @return [Constraint, nil]
     def constraint(name)
       constraints.find { |con| con.name == name }
-    end
-
-    private
-
-    # Create an array of all possible premises for the puzzle.
-    #
-    # @return [Array<Logigram::Premise>]
-    def generate_all_premises
-      pieces.map { |pc| generate_piece_premises pc }.flatten
-    end
-
-    # Create an array of all possible premises for the specified piece.
-    #
-    # @param piece [Logigram::Piece]
-    # @return [Array<Logigram::Premise>]
-    def generate_piece_premises(piece)
-      result = []
-      piece.properties.map(&:name).each do |t|
-        # Positive specific
-        result.push Premise.new(piece, constraint(t), piece.value(t))
-        term_values = pieces.map { |piece| piece.value(t) }
-        # Positive generic
-        (constraints - [constraint(t)]).each do |o|
-          result.push Premise.new(piece, constraint(t), piece.value(t), o)
-        end
-        # Negative specific
-        (term_values - [piece.value(t)]).each do |o|
-          result.push Premise.new(piece, constraint(t), o)
-        end
-        # Negative generic
-        (term_values - [piece.value(t)]).each do |o|
-          (constraints - [constraint(t)]).each do |id|
-            result.push Premise.new(piece, constraint(t), o, id)
-          end
-        end
-      end
-      result
     end
   end
 end

@@ -28,16 +28,6 @@ RSpec.describe Logigram::Base do
     expect(['dog', 'cat', 'pig']).to include(puzzle.solution.name)
   end
 
-  it 'generates premises' do
-    klass = Class.new(Logigram::Base) do
-      constrain 'color', ['red', 'green', 'blue']
-      constrain 'size', ['small', 'medium', 'large']
-    end
-    # @type [Logigram::Base]
-    puzzle = klass.new(['dog', 'cat', 'pig'])
-    expect(puzzle.premises).not_to be_empty
-  end
-
   it 'raises an error for insufficient constraint values' do
     klass = Class.new(Logigram::Base) do
       constrain 'color', ['red']

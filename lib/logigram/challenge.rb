@@ -12,9 +12,10 @@ module Logigram
       @difficulty = difficulty
     end
 
-    def clues
-      @clues ||= generate_clues.shuffle
+    def premises
+      @premises ||= generate_premises.shuffle
     end
+    alias clues premises
 
     private
 
@@ -48,7 +49,7 @@ module Logigram
       ([first] + (puzzle.constraints - [first])).compact
     end
 
-    def generate_clues
+    def generate_premises
       result = []
       last_constraint = nil
       positive = false
