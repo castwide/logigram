@@ -111,12 +111,6 @@ module Logigram
     # @return [Array<String>]
     attr_reader :solution_terms
 
-    def solution_term
-      raise 'Use `solution_terms` when there is more than one term' unless @solution_terms.one?
-
-      @solution_terms.first
-    end
-
     # Shortcut to get the solution terms' values, e.g., "red"
     #
     # @return [Array<String>]
@@ -124,30 +118,11 @@ module Logigram
       @solution_terms.map { |t| @solution.value(t) }
     end
 
-    # Shortcut to get the solution term's value, e.g., "red"
-    #
-    # @raise [RuntimeError] if there is more than one solution term
-    # @return [String]
-    def solution_value
-      raise 'Use `solution_values` when there is more than one term' unless @solution_terms.one?
-
-      @solution.value(@solution_terms.first)
-    end
-
     # Shortcut to get the solution terms' predicates, e.g., "is red"
     #
     # @return [Array<String>]
     def solution_predicates
       @solution_terms.map { |t| constraint(t).predicate(@solution.value(t)) }
-    end
-
-    # Shortcut to get the solution term's predicate, e.g., "is red"
-    #
-    # @return [String]
-    def solution_predicate
-      raise 'Use `solution_predicates` when there is more than one term' unless @solution_terms.one?
-
-      constraint(@solution_terms.first).predicate(@solution.value(@solution_terms.first))
     end
 
     # @return [Array<Logigram::Piece>]
@@ -176,12 +151,12 @@ module Logigram
         selected_values[term] = constraint(term).reserves.sample
       end
       @solution = generate_piece(solution, selected_values, true)
-      objects.each do |o|
-        @object_pieces[o] = if o == solution
-                              @solution
-                            else
-                              generate_piece(o, selected_values, false)
-                            end
+      objects.each do |obj|
+        @object_pieces[obj] = if obj == solution
+                                @solution
+                              else
+                                generate_piece(obj, selected_values, false)
+                              end
       end
     end
 

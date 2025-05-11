@@ -15,7 +15,7 @@ RSpec.describe Logigram::Challenge do
   it 'excludes the solution predicate from the clues' do
     challenge = Logigram::Challenge.new(puzzle)
     strings = challenge.clues.map(&:to_s)
-    expect(strings).not_to include("#{puzzle.solution} #{puzzle.solution_predicate}")
+    expect(strings).not_to include("#{puzzle.solution} #{puzzle.solution_predicates}")
   end
 
   it 'generates easy clues' do

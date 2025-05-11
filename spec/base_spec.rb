@@ -53,8 +53,7 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog'])
-    expect(puzzle.solution_term).to eq('color')
-    expect(puzzle.solution_predicate).to eq('is red')
+    expect(puzzle.solution_terms).to eq(['color'])
     expect(puzzle.solution_predicates).to eq(['is red'])
   end
 
@@ -65,7 +64,8 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog'])
-    expect(['color', 'size']).to include(puzzle.solution_term)
+    expect(puzzle.solution_terms).to be_one
+    expect(['color', 'size']).to include(puzzle.solution_terms.first)
   end
 
   it 'uses reserves for solutions' do
@@ -109,7 +109,7 @@ RSpec.describe Logigram::Base do
     # though the other two terms will always be the same. For example, if the
     # solution piece is red, the other pieces will both be green.
     puzzle = klass.new(['pencil', 'pen', 'crayon'])
-    solution = puzzle.solution_value
+    solution = puzzle.solution_values.first
     matches = puzzle.pieces.select { |piece| piece.value('color') == solution }
     expect(matches).to be_one
     expect(puzzle.solution_values).to eq([solution])
