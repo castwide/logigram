@@ -72,11 +72,6 @@ module Logigram
       super(constraints: self.class.constraints, objects: objects, selection: selection, terms: term_constraints)
     end
 
-    # @return [Array<Premise>]
-    def premises
-      @premises ||= generate_all_premises
-    end
-
     # @param name [String]
     # @return [Constraint, nil]
     def constraint(name)
@@ -120,42 +115,6 @@ module Logigram
     # @return [Logigram::Piece]
     def piece_for(object)
       pieces.find { |piece| piece.object == object }
-    end
-
-    private
-
-    # Create an array of all possible premises for the puzzle.
-    #
-    # @return [Array<Logigram::Premise>]
-    def generate_all_premises
-      pieces.map { |pc| generate_piece_premises pc }.flatten
-    end
-
-    # Create an array of all possible premises for the specified piece.
-    #
-    # @param piece [Logigram::Piece]
-    # @return [Array<Logigram::Premise>]
-    def generate_piece_premises(piece)
-      result = []
-      piece.terms.each do |t|
-        # Positive specific
-        result.push Premise.new(piece, constraint(t), piece.value(t))
-        # Positive generic
-        (constraints - [constraint(t)]).each do |o|
-          result.push Premise.new(piece, constraint(t), piece.value(t), o)
-        end
-        # Negative specific
-        (term_values(t) - [piece.value(t)]).each do |o|
-          result.push Premise.new(piece, constraint(t), o)
-        end
-        # Negative generic
-        (term_values(t) - [piece.value(t)]).each do |o|
-          (constraints - [constraint(t)]).each do |id|
-            result.push Premise.new(piece, constraint(t), o, id)
-          end
-        end
-      end
-      result
     end
   end
 end
