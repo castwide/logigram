@@ -1,130 +1,102 @@
 # frozen_string_literal: true
 
 module Logigram
-  # Use the Logigram::Challenge class to generate a list of clues from a
-  # puzzle.
-  #
-  # Challenges have three degrees of difficulty.
-  # - easy: all affirmative premises
-  # - medium: mixture of affirmative and negative premises
-  # - hard: one affirmative premise per constraint
-  #
   class Challenge
-    # @return [Array<Logigram::Premise>]
-    attr_reader :clues
-
+    # @return [Puzzle]
     attr_reader :puzzle
 
-    # @param puzzle [Logigram::Base]
-    # @param difficulty [Symbol] :easy, :medium, :hard
-    def initialize(puzzle, difficulty: :medium)
+    attr_reader :difficulty
+
+    def initialize puzzle, difficulty: :medium
       @puzzle = puzzle
-      @clues = []
-      @term_values = {}
       @difficulty = difficulty
-      generate_premises
+    end
+
+    def clues
+      @clues ||= generate_clues.shuffle
     end
 
     private
 
-    # @return [Array<Constraint>]
+    def unique_solution_determinants
+      @unique_solution_determinants ||= puzzle.determinants.select do |det|
+        sol_val = puzzle.solution.value(det.name)
+        puzzle.pieces.select { |piece| piece.value(det.name) == sol_val }.one?
+      end
+    end
+
+    def ambiguous_solution_determinants
+      @ambiguous_solution_determinants ||= puzzle.determinants - unique_solution_determinants
+    end
+
     def unique_constraints
-      @unique_constraints ||= puzzle.determinants.select do |con|
-        value = puzzle.solution.value(con.name)
-        puzzle.pieces.select { |p| p.value(con.name) == value }.one?
+      @unique_constraints ||= (puzzle.constraints - puzzle.determinants).select do |con|
+        puzzle.pieces.map { |piece| piece.value(con.name) }.uniq.length == puzzle.pieces.length
       end
     end
 
-    # @return [Array<Constraint>]
+    # All pieces except the solution
+    #
+    def herrings
+      puzzle.pieces - [puzzle.solution]
+    end
+
     def sorted_constraints
-      @sorted_constraints ||= begin
-        fixed_constraints = unique_constraints || [puzzle.determinants.sample]
-        other = (puzzle.constraints - fixed_constraints).shuffle
-        first = other.shift
-        (first ? [first] : []) + other + fixed_constraints
-      end
+      # The first constraint to be used for generating clues should not be a
+      # determinant
+      first = (puzzle.constraints - puzzle.determinants).sample
+      [first] + (puzzle.constraints - [first])
     end
 
-    # Remove a value from a term's availability list.
-    #
-    # @param term [String]
-    # @param value [String]
-    # @return [void]
-    def remove_value(term, value)
-      @term_values[term] ||= puzzle.pieces.map { |piece| piece.value(term) }
-      @term_values[term].delete value
-    end
-
-    # Get a random value from a term's availability list.
-    #
-    # @param term [String]
-    # @param except [String, nil]
-    def sample_value(term, except: nil)
-      @term_values[term] ||= puzzle.pieces.map { |piece| piece.value(term) }
-      # Try to eliminate the exception but allow it if it's the only option
-      (@term_values[term] - [except]).sample || @term_values[term].sample
-    end
-
-    # @return [void]
-    def generate_premises
+    def generate_clues
+      result = []
       last_constraint = nil
-      sorted_constraints[0..-2].each do |constraint|
-        shuffled_pieces = puzzle.pieces.shuffle
-        shuffled_pieces[0..-2].each_with_index do |piece, index|
-          @clues.push generate_premise(piece, constraint, last_constraint, affirmation_at(index))
-        end
-        last_constraint = constraint
-      end
-      (puzzle.pieces - [puzzle.solution]).shuffle.each_with_index do |piece, index|
-        @clues.push generate_premise(piece, sorted_constraints.last, last_constraint, affirmation_at(index))
-      end
-      @clues = [@clues[0]] + @clues[1..-1].shuffle
-    end
-
-    # @param index [Integer]
-    # @return [Symbol]
-    def affirmation_at(index)
-      if @difficulty == :easy
-        :affirmative
-      elsif @difficulty == :medium
-        if index < puzzle.pieces.length - 2
-          :affirmative
+      positive = false
+      # puzzle.constraints.shuffle.each do |con|
+      sorted_constraints.each do |con|
+        if unique_solution_determinants.include?(con)
+          # Give the first a positive premise
+          first = herrings.shuffle.first
+          value = first.value(con.name)
+          result.push Premise.new(first, con, value, last_constraint)
+          # Give the rest varying premises based on difficulty
+          mixup = puzzle.pieces.shuffle - [first]
+          until mixup.one?
+            here = mixup.pop
+            if difficulty == :easy || (difficulty == :medium && positive)
+              result.push Premise.new(here, con, here.value(con.name), last_constraint)
+            else
+              result.push Premise.new(here, con, mixup.first.value(con.name), last_constraint)
+            end
+            positive = !positive
+          end
+          last_constraint = con
+        elsif ambiguous_solution_determinants.include?(con)
+          puts "Ambiguous solution determinant: #{con.name}"
+          last_constraint = nil
+        elsif unique_constraints.include?(con)
+          # Give one a positive premise
+          first = puzzle.pieces.shuffle.first
+          value = first.value(con.name)
+          result.push Premise.new(first, first.property(con.name), value, last_constraint)
+          # Give the rest varying premises based on difficulty
+          mixup = puzzle.pieces.shuffle - [first]
+          until mixup.one?
+            here = mixup.pop
+            if difficulty == :easy || (difficulty == :medium && positive)
+              result.push Premise.new(here, con, here.value(con.name), last_constraint)
+            else
+              result.push Premise.new(here, con, mixup.first.value(con.name), last_constraint)
+            end
+            positive = !positive
+          end
+          last_constraint = con
         else
-          :random
-        end
-      elsif @difficulty == :hard
-        if index == 0
-          :affirmative
-        else
-          :negative
+          puts "Ambiguous constraint: #{con.name}"
+          last_constraint = nil
         end
       end
-    end
-
-    # @param piece [Logigram::Piece]
-    # @param constraint [Logigram::Constraint]
-    # @param identifier [Logigram::Constraint]
-    # @param affirm [Symbol] :affirmative, :negative, :random
-    def generate_premise(piece, constraint, identifier, affirm)
-      value = case affirm
-              when :affirmative
-                piece.value(constraint.name)
-              when :negative
-                sample_value(constraint.name, except: piece.value(constraint.name))
-              else
-                sample_value(constraint.name)
-              end
-      remove_value constraint.name, value
-      Logigram::Premise.new(piece, constraint, value, clarify(piece, identifier))
-    end
-
-    # @param piece [Piece]
-    # @param identifier [Constraint, nil]
-    def clarify(piece, identifier)
-      return nil unless identifier
-
-      total = puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
-      total.length == 1 ? identifier : nil
+      result
     end
   end
 end

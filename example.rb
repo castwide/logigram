@@ -16,13 +16,14 @@ end
 puzzle = Puzzle.new(['the dog', 'the cat', 'the pig'])
 
 # The challenge holds the clues the player can use to solve the puzzle
-challenge = Logigram::Challenge.new(puzzle)
+challenge = Logigram::Challenge.new(puzzle, difficulty: :medium)
 
 puts "The animals are #{puzzle.pieces.join(', ')}"
 puzzle.constraints.each do |c|
   puts "One of each is #{c.values.join(', ')}"
 end
-puts "Which animal #{puzzle.solution.properties.first.predicate}?"
+
+puts "Which animal #{puzzle.solution.property(puzzle.determinants.first.name).predicate}?"
 
 puts 'Known facts:'
 challenge.clues.each do |c|
@@ -32,4 +33,4 @@ end
 print 'Press enter for the solution....'
 $stdin.gets
 
-puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution.properties.first.predicate}."
+puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution.property(puzzle.determinants.first.name).predicate}."

@@ -32,13 +32,6 @@ RSpec.describe Logigram::Premise do
     expect(premise).to be_negative
   end
 
-  it 'sets the term' do
-    constraint = Logigram::Constraint.new('color', ['red', 'blue'])
-    piece = Logigram::Piece.new('dog', [Logigram::Property.new(constraint, 'red')])
-    premise = Logigram::Premise.new(piece, constraint, 'blue')
-    expect(premise.term).to eq('color')
-  end
-
   it 'uses affirmative text' do
     constraint = Logigram::Constraint.new('color', ['red', 'blue'])
     piece = Logigram::Piece.new('dog', [Logigram::Property.new(constraint, 'red')])

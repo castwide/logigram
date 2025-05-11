@@ -19,6 +19,10 @@ module Logigram
       constraint.name
     end
 
+    def subject
+      constraint.subject(value)
+    end
+
     def predicate
       constraint.predicate(value)
     end

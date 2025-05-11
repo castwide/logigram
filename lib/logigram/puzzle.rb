@@ -45,6 +45,12 @@ module Logigram
       pieces.find { |piece| piece.object == object }
     end
 
+    # @param name [String]
+    # @return [Constraint, nil]
+    def constraint(name)
+      constraints.find { |con| con.name == name }
+    end
+
     private
 
     # Create an array of all possible premises for the puzzle.

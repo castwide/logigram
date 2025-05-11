@@ -68,11 +68,5 @@ module Logigram
       det_cons = determinants.map { |id| id.is_a?(Constraint) ? id : self.class.constraint(id) }
       super(constraints: self.class.constraints, objects: objects, selection: selection, determinants: det_cons)
     end
-
-    # @param name [String]
-    # @return [Constraint, nil]
-    def constraint(name)
-      self.class.constraint name
-    end
   end
 end
