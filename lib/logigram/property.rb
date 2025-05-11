@@ -18,5 +18,9 @@ module Logigram
     def name
       constraint.name
     end
+
+    def predicate
+      constraint.predicate(value)
+    end
   end
 end

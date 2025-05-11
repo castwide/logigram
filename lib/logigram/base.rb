@@ -78,13 +78,6 @@ module Logigram
       self.class.constraint name
     end
 
-    # Shortcut to get the solution terms' predicates, e.g., "is red"
-    #
-    # @return [Array<String>]
-    def solution_predicates
-      terms.map { |term| term.predicate(solution.value(term.name)) }
-    end
-
     # Get the piece associated with an object.
     #
     # @param object [Object] The object used to generate the piece

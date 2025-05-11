@@ -54,7 +54,7 @@ RSpec.describe Logigram::Base do
     # @type [Logigram::Base]
     puzzle = klass.new(['dog'])
     expect(puzzle.terms.map(&:name)).to eq(['color'])
-    expect(puzzle.solution_predicates).to eq(['is red'])
+    expect(puzzle.solution.properties.map(&:predicate)).to eq(['is red'])
   end
 
   it 'sets a random solution term' do
