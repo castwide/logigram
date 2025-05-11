@@ -27,23 +27,19 @@ module Logigram
 
     private
 
-    def solution_constraints
-      @puzzle.determinants
-    end
-
     # @return [Array<Constraint>]
     def unique_constraints
-      @unique_constraints ||= solution_constraints.select do |con|
-        value = @puzzle.solution.value(con.name)
-        @puzzle.pieces.select { |p| p.value(con.name) == value }.one?
+      @unique_constraints ||= puzzle.determinants.select do |con|
+        value = puzzle.solution.value(con.name)
+        puzzle.pieces.select { |p| p.value(con.name) == value }.one?
       end
     end
 
     # @return [Array<Constraint>]
     def sorted_constraints
       @sorted_constraints ||= begin
-        fixed_constraints = unique_constraints || [solution_constraints.sample]
-        other = (@puzzle.constraints - fixed_constraints).shuffle
+        fixed_constraints = unique_constraints || [puzzle.determinants.sample]
+        other = (puzzle.constraints - fixed_constraints).shuffle
         first = other.shift
         (first ? [first] : []) + other + fixed_constraints
       end
@@ -55,7 +51,7 @@ module Logigram
     # @param value [String]
     # @return [void]
     def remove_value(term, value)
-      @term_values[term] ||= @puzzle.pieces.map { |piece| piece.value(term) }
+      @term_values[term] ||= puzzle.pieces.map { |piece| piece.value(term) }
       @term_values[term].delete value
     end
 
@@ -64,7 +60,7 @@ module Logigram
     # @param term [String]
     # @param except [String, nil]
     def sample_value(term, except: nil)
-      @term_values[term] ||= @puzzle.pieces.map { |piece| piece.value(term) }
+      @term_values[term] ||= puzzle.pieces.map { |piece| piece.value(term) }
       # Try to eliminate the exception but allow it if it's the only option
       (@term_values[term] - [except]).sample || @term_values[term].sample
     end
@@ -73,13 +69,13 @@ module Logigram
     def generate_premises
       last_constraint = nil
       sorted_constraints[0..-2].each do |constraint|
-        shuffled_pieces = @puzzle.pieces.shuffle
+        shuffled_pieces = puzzle.pieces.shuffle
         shuffled_pieces[0..-2].each_with_index do |piece, index|
           @clues.push generate_premise(piece, constraint, last_constraint, affirmation_at(index))
         end
         last_constraint = constraint
       end
-      (@puzzle.pieces - [@puzzle.solution]).shuffle.each_with_index do |piece, index|
+      (puzzle.pieces - [puzzle.solution]).shuffle.each_with_index do |piece, index|
         @clues.push generate_premise(piece, sorted_constraints.last, last_constraint, affirmation_at(index))
       end
       @clues = [@clues[0]] + @clues[1..-1].shuffle
@@ -91,7 +87,7 @@ module Logigram
       if @difficulty == :easy
         :affirmative
       elsif @difficulty == :medium
-        if index < @puzzle.pieces.length - 2
+        if index < puzzle.pieces.length - 2
           :affirmative
         else
           :random
@@ -127,7 +123,7 @@ module Logigram
     def clarify(piece, identifier)
       return nil unless identifier
 
-      total = @puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
+      total = puzzle.pieces.select { |p| p.value(identifier.name) == piece.value(identifier.name) }
       total.length == 1 ? identifier : nil
     end
   end
