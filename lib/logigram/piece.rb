@@ -9,16 +9,14 @@ module Logigram
     attr_reader :properties
 
     # @param object [Object]
-    # @param terms [Array<Property>]
-    # @param name [String]
-    def initialize object, properties, name: nil
+    # @param properties [Array<Property>]
+    def initialize object, properties
       @object = object
       @properties = properties
-      @name = name
     end
 
     def name
-      @name || object.to_s
+      object.to_s
     end
 
     def terms
