@@ -2,27 +2,32 @@
 
 module Logigram
   class Puzzle
+    # All of the constraints in the puzzle.
+    #
     # @return [Array<Constraint>]
     attr_reader :constraints
 
+    # The constraints that must be solved to determine the solution.
+    #
+    # @return [Array<Constraint>]
     attr_reader :terms
 
+    # @return [Array<Piece>]
     attr_reader :pieces
 
-    # The piece that represents the solution. The puzzle's premises should be
-    # clues from which this solution can be deduced.
-    #
     # @return [Piece]
     attr_reader :solution
 
-    def initialize constraints:,  objects:, terms: nil, selection: nil
+    # @param constraints [Array<Constraint>]
+    # @param objects [Array<Object>]
+    # @param terms [Array<Constraint>]
+    # @param selection [Object]
+    def initialize constraints:, objects:, terms: constraints.sample, selection: objects.sample
       @constraints = constraints
-      @terms = terms ? [terms].flatten : [constraints.sample]
+      @terms = [terms].flatten
       @terms.each { |term| constraints.push term unless constraints.include?(term) }
-      selection ||= objects.sample
       objects.push selection unless objects.include?(selection)
-      @pieces = Piece::Factory.make(constraints, @terms, objects, selection)
-      @solution ||= pieces.find { |piece| piece.object == selection }
+      @pieces, @solution = Piece::Factory.make(constraints, @terms, objects, selection)
     end
   end
 end

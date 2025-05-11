@@ -2,20 +2,36 @@
 
 module Logigram
   class Piece
+    # A class for generating puzzle pieces.
+    #
     class Factory
+      # @return [Array<Piece>]
+      attr_reader :pieces
+
+      # @return [Piece]
+      attr_reader :solution
+
+      # @param constraints [Array<Constraint>]
+      # @param terms [Array<Constraint>]
+      # @param objects [Array<Object>]
+      # @param selection [Object]
       def initialize(constraints, terms, objects, selection)
         @constraints = constraints
         @terms = terms
-        @objects = objects
-        @selection = selection
+        @solution = generate_solution(selection)
+        @pieces = generate_pieces(objects)
       end
 
-      def pieces
-        @pieces ||= generate_pieces
-      end
-
-      def self.make constraints, terms, objects, selection
-        new(constraints, terms, objects, selection).pieces
+      # Generate puzzle pieces from provided constraints and objects.
+      #
+      # @param constraints [Array<Constraint>]
+      # @param terms [Array<Constraint>]
+      # @param objects [Array<Object>]
+      # @param selection [Object]
+      # @return [Array(Array<Piece>, Piece)]
+      def self.make(constraints, terms, objects, selection)
+        fac = new(constraints, terms, objects, selection)
+        [fac.pieces, fac.solution]
       end
 
       private
@@ -26,56 +42,69 @@ module Logigram
       # @return [Array<Constraint>]
       attr_reader :terms
 
-      # @return [Array<Object>]
-      attr_reader :objects
-
-      # @return [Object]
-      attr_reader :selection
-
-      def generate_pieces
-        solution = generate_solution(selection)
+      # @param objects [Array<Object>]
+      def generate_pieces(objects)
         objects.map do |object|
-          object == selection ? solution : generate_candidate(object, solution)
+          object == solution.object ? solution : generate_candidate(object)
         end
       end
 
-      def generate_solution object
+      # @param object [Object]
+      # @return [Piece]
+      def generate_solution(object)
         properties = constraints.map do |con|
           value = con.reserves.sample || constraint_repo[con].sample
-          raise 'NOOO!' unless value
+          raise "Unable to select value for constraint '#{con.name}'" unless value
+
           constraint_repo[con].delete value if con.unique?
           Property.new(con, value)
         end
         Piece.new(object, properties)
       end
 
-      def generate_candidate object, solution
-        # @todo Make sure the candidate can select properties that don't match
-        #   the solution terms
+      # @param object [Object]
+      # @return [Piece]
+      def generate_candidate(object)
         properties = constraints.map do |con|
           value = constraint_repo[con].sample
-          raise 'NOOO!' unless value
+          raise "Unable to select value for constraint '#{con.name}'" unless value
+
           constraint_repo[con].delete value if con.unique?
           Property.new(con, value)
         end
-        validated = validate(properties, solution)
-        Piece.new(object, validated)
+        Piece.new(object, validate(properties))
       end
 
+      # @return [Hash{Constraint => Array<String>}]
       def constraint_repo
         @constraint_repo ||= constraints.map { |con| [con, con.values.dup] }.to_h
       end
 
-      def validate properties, solution
+      # Ensure that the properties are not an exact match for the solution's
+      # properties.
+      #
+      # @param properties [Array<Property>]
+      # @return [Array<Property>]
+      def validate(properties)
         check = properties.select { |prop| terms.include?(prop.constraint) }
         conflicts = check.select { |prop| prop.value == solution.value(prop.constraint.name) }
         return properties if conflicts.length < check.length
-        fix = conflicts.sample
-        valid = properties - [fix]
+
+        replace properties, conflicts.sample
+      end
+
+      # Replace the value for one of the properties.
+      #
+      # @param properties [Array<Property>]
+      # @param fix [Property]
+      # @return [Array<Property>]
+      def replace(properties, fix)
+        update = properties - [fix]
         value = (fix.constraint.values - [fix.value]).sample
-        raise 'OH NO!' unless value
-        valid.push Property.new(fix.constraint, value)
-        valid
+        raise "Unable to select value for constraint '#{fix.constraint.name}'" unless value
+
+        update.push Property.new(fix.constraint, value)
+        update
       end
     end
   end

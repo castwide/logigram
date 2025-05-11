@@ -3,7 +3,7 @@ module Logigram
   # this class directly, but extend it with their own puzzle implementations.
   #
   # @example
-  #   class Puzzle < Logigram::Base
+  #   class Example < Logigram::Base
   #     constrain 'color', ['red', 'green', 'blue']
   #     constrain 'size', ['small', 'medium', 'large']
   #   end
@@ -64,11 +64,11 @@ module Logigram
     #
     # @param objects [Array<Object>] The piece identifiers
     # @param selection [Object] Which object to use as the solution
-    # @param terms [String, Array<String>, nil] The solution term(s)
+    # @param terms [String, Constraint, Array<String, Constraint>, nil] The solution term(s) or term name(s)
     # @param recur [String, Array<String>, nil] Recurring constraints (uniqueness never enforced)
     def initialize(objects, selection: objects.sample, terms: nil)
       terms = terms ? [terms].flatten : [self.class.constraints.map(&:name).sample]
-      term_constraints = terms.map { |name| self.class.constraint(name) }
+      term_constraints = terms.map { |tm| tm.is_a?(Constraint) ? tm : self.class.constraint(tm) }
       super(constraints: self.class.constraints, objects: objects, selection: selection, terms: term_constraints)
     end
 
