@@ -45,7 +45,7 @@ module Logigram
       # The first constraint to be used for generating clues should not be a
       # determinant
       first = (puzzle.constraints - puzzle.determinants).sample
-      [first] + (puzzle.constraints - [first])
+      ([first] + (puzzle.constraints - [first])).compact
     end
 
     def generate_clues
@@ -72,7 +72,26 @@ module Logigram
           end
           last_constraint = con
         elsif ambiguous_solution_determinants.include?(con)
-          puts "Ambiguous solution determinant: #{con.name}"
+          # Give the first herring a positive premise
+          ambiguous_value = puzzle.solution.value(con.name)
+          first = herrings.select { |piece| piece.value(con.name) == ambiguous_value }.sample
+          result.push Premise.new(first, con, ambiguous_value, nil)
+          # Give the rest varying premises based on difficulty
+          mixup = puzzle.pieces.shuffle - [first]
+          until mixup.empty?
+            here = mixup.pop
+            if here == puzzle.solution && difficulty != :easy
+              other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
+              result.push Premise.new(here, con, other_value, nil)
+            else
+              if difficulty == :easy || (difficulty == :medium && positive)
+                result.push Premise.new(here, con, here.value(con.name), nil)
+              else
+                result.push Premise.new(here, con, ambiguous_value, nil)
+              end
+            end
+            positive = !positive
+          end
           last_constraint = nil
         elsif unique_constraints.include?(con)
           # Give one a positive premise
@@ -91,7 +110,23 @@ module Logigram
           end
           last_constraint = con
         else
-          puts "Ambiguous constraint: #{con.name}"
+          # Ambiguous constraint
+          ambiguous_value = puzzle.solution.value(con.name)
+          mixup = puzzle.pieces.shuffle
+          until mixup.empty?
+            here = mixup.pop
+            if here == puzzle.solution && difficulty != :easy
+              other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
+              result.push Premise.new(here, con, other_value, nil)
+            else
+              if difficulty == :easy || (difficulty == :medium && positive)
+                result.push Premise.new(here, con, here.value(con.name), nil)
+              else
+                result.push Premise.new(here, con, ambiguous_value, nil)
+              end
+            end
+            positive = !positive
+          end
           last_constraint = nil
         end
       end
