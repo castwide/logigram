@@ -78,16 +78,6 @@ module Logigram
       self.class.constraint name
     end
 
-    # Get an array of values for a constraint.
-    # This method will only include values that are currently assigned to pieces.
-    #
-    # @return [Array<Object>]
-    def term_values(key)
-      # Use an intersection to retain the order in which the values were
-      # assigned to the constraint
-      constraint(key).values & pieces.map { |piece| piece.value(key) }
-    end
-
     # Shortcut to get the solution terms' values, e.g., "red"
     #
     # @return [Array<String>]

@@ -53,7 +53,7 @@ module Logigram
     # @param value [String]
     # @return [void]
     def remove_value(term, value)
-      @term_values[term] ||= @puzzle.term_values(term)
+      @term_values[term] ||= @puzzle.pieces.map { |piece| piece.value(term) }
       @term_values[term].delete value
     end
 
@@ -62,7 +62,7 @@ module Logigram
     # @param term [String]
     # @param except [String, nil]
     def sample_value(term, except: nil)
-      @term_values[term] ||= @puzzle.term_values(term)
+      @term_values[term] ||= @puzzle.pieces.map { |piece| piece.value(term) }
       # Try to eliminate the exception but allow it if it's the only option
       (@term_values[term] - [except]).sample || @term_values[term].sample
     end

@@ -53,16 +53,17 @@ module Logigram
       piece.terms.each do |t|
         # Positive specific
         result.push Premise.new(piece, constraint(t), piece.value(t))
+        term_values = pieces.map { |piece| piece.value(t) }
         # Positive generic
         (constraints - [constraint(t)]).each do |o|
           result.push Premise.new(piece, constraint(t), piece.value(t), o)
         end
         # Negative specific
-        (term_values(t) - [piece.value(t)]).each do |o|
+        (term_values - [piece.value(t)]).each do |o|
           result.push Premise.new(piece, constraint(t), o)
         end
         # Negative generic
-        (term_values(t) - [piece.value(t)]).each do |o|
+        (term_values - [piece.value(t)]).each do |o|
           (constraints - [constraint(t)]).each do |id|
             result.push Premise.new(piece, constraint(t), o, id)
           end
