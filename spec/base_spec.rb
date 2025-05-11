@@ -14,7 +14,7 @@ RSpec.describe Logigram::Base do
       constrain 'color', ['red', 'green', 'blue']
     end
     # @type [Logigram::Base]
-    puzzle = klass.new(['dog', 'cat', 'pig'], solution: 'dog')
+    puzzle = klass.new(['dog', 'cat', 'pig'], selection: 'dog')
     expect(puzzle.solution.name).to eq('dog')
   end
 
@@ -90,7 +90,7 @@ RSpec.describe Logigram::Base do
 
   it 'allows duplicate values' do
     klass = Class.new(Logigram::Base) do
-      constrain 'color', ['red', 'green']
+      constrain 'color', ['red', 'green'], unique: false
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['pencil', 'pen', 'crayon'])
@@ -103,7 +103,7 @@ RSpec.describe Logigram::Base do
   it 'sets unique solution terms' do
     # @type [Class<Logigram::Base>]
     klass = Class.new(Logigram::Base) do
-      constrain 'color', ['red', 'green']
+      constrain 'color', ['red', 'green'], unique: false
     end
     # This should succeed because the solution term can always be unique, even
     # though the other two terms will always be the same. For example, if the

@@ -26,11 +26,17 @@ module Logigram
     # @param values [Array] All possible values for the constraint
     # @param reserve [Object, Array<Object>, nil] Values to reserve for solutions
     # @param formatter [Formatter] Formatting rules
-    def initialize name, values, reserve: nil, formatter: Formatter::DEFAULT
+    # @param unique [Boolean]
+    def initialize name, values, reserve: nil, formatter: Formatter::DEFAULT, unique: true
       @name = name
       @values = values
       @reserves = configure_reserves(reserve)
       @formatter = formatter
+      @unique = unique
+    end
+
+    def unique?
+      @unique
     end
 
     # A noun form for the value, e.g., "the red thing"

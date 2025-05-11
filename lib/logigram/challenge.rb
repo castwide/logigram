@@ -26,7 +26,8 @@ module Logigram
     private
 
     def solution_constraints
-      @solution_constraints ||= @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
+      # @solution_constraints ||= @puzzle.solution_terms.map { |t| @puzzle.constraint(t) }
+      @puzzle.terms
     end
 
     # @return [Array<Constraint>]

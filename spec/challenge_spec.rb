@@ -44,7 +44,7 @@ RSpec.describe Logigram::Challenge do
 
   it 'supports duplicate values' do
     klass = Class.new(Logigram::Base) do
-      constrain 'color', ['red', 'green']
+      constrain 'color', ['red', 'green'], unique: false
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['pencil', 'pen', 'crayon'])

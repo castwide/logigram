@@ -8,13 +8,7 @@ module Logigram
   #     constrain 'size', ['small', 'medium', 'large']
   #   end
   #
-  class Base
-    # The piece that represents the solution. The puzzle's premises should be
-    # clues from which this solution can be deduced.
-    #
-    # @return [Piece]
-    attr_reader :solution
-
+  class Base < Puzzle
     class << self
       # An array of the puzzle's constraints.
       #
@@ -52,8 +46,8 @@ module Logigram
       # @param reserve [Object, Array<Object>, nil] Require the solution to be one of these values
       # @param formatter [Formatter] Formatting rules for generated premises
       # @return [Logigram::Constraint] The newly created constraint
-      def constrain(name, values, reserve: nil, formatter: Formatter::DEFAULT)
-        constraint_map[name] = Constraint.new(name, values, reserve: reserve, formatter: formatter)
+      def constrain(name, values, reserve: nil, formatter: Formatter::DEFAULT, unique: true)
+        constraint_map[name] = Constraint.new(name, values, reserve: reserve, formatter: formatter, unique: unique)
       end
 
       private
@@ -69,25 +63,18 @@ module Logigram
     # The `objects` array is required. If `solution` and `terms` are not provided, they'll be randomly generated.
     #
     # @param objects [Array<Object>] The piece identifiers
-    # @param solution [Object] Which object to use as the solution
+    # @param selection [Object] Which object to use as the solution
     # @param terms [String, Array<String>, nil] The solution term(s)
     # @param recur [String, Array<String>, nil] Recurring constraints (uniqueness never enforced)
-    def initialize(objects, solution: objects.sample, terms: nil, recur: nil)
-      @object_pieces = {}
-      @solution_terms = terms ? [terms].flatten : [constraints.map(&:name).sample]
-      @recur = recur ? [recur].flatten : []
-      objects.push solution unless objects.include?(solution)
-      generate_pieces objects, solution
+    def initialize(objects, selection: objects.sample, terms: nil)
+      terms = terms ? [terms].flatten : [self.class.constraints.map(&:name).sample]
+      term_constraints = terms.map { |name| self.class.constraint(name) }
+      super(constraints: self.class.constraints, objects: objects, selection: selection, terms: term_constraints)
     end
 
     # @return [Array<Premise>]
     def premises
       @premises ||= generate_all_premises
-    end
-
-    # @return [Array<Constraint>]
-    def constraints
-      self.class.constraints
     end
 
     # @param name [String]
@@ -109,25 +96,22 @@ module Logigram
     # The terms that should be used to identify the solution.
     #
     # @return [Array<String>]
-    attr_reader :solution_terms
+    def solution_terms
+      solution.properties.select { |prop| terms.include?(prop.constraint) }.map(&:name)
+    end
 
     # Shortcut to get the solution terms' values, e.g., "red"
     #
     # @return [Array<String>]
     def solution_values
-      @solution_terms.map { |t| @solution.value(t) }
+      solution_terms.map { |t| @solution.value(t) }
     end
 
     # Shortcut to get the solution terms' predicates, e.g., "is red"
     #
     # @return [Array<String>]
     def solution_predicates
-      @solution_terms.map { |t| constraint(t).predicate(@solution.value(t)) }
-    end
-
-    # @return [Array<Logigram::Piece>]
-    def pieces
-      @object_pieces.values
+      solution_terms.map { |t| constraint(t).predicate(@solution.value(t)) }
     end
 
     # Get the piece associated with an object.
@@ -135,82 +119,10 @@ module Logigram
     # @param object [Object] The object used to generate the piece
     # @return [Logigram::Piece]
     def piece_for(object)
-      @object_pieces[object]
+      pieces.find { |piece| piece.object == object }
     end
 
     private
-
-    # Generate the puzzle pieces.
-    #
-    # @param objects [Array<Object>]
-    # @param solution [Object]
-    # @return [void]
-    def generate_pieces(objects, solution)
-      selected_values = {}
-      solution_terms.each do |term|
-        selected_values[term] = constraint(term).reserves.sample
-      end
-      @solution = generate_piece(solution, selected_values, true)
-      objects.each do |obj|
-        @object_pieces[obj] = if obj == solution
-                                @solution
-                              else
-                                generate_piece(obj, selected_values, false)
-                              end
-      end
-    end
-
-    # @param object [Object]
-    # @param selected_values [Hash]
-    # @param selected [Boolean]
-    # @return [Piece]
-    def generate_piece(object, selected_values, selected)
-      constraint_repo = generate_constraint_repo(selected_values, selected)
-      properties = []
-      constraint_repo.each_pair do |key, values|
-        raise "Unable to select value for constraint '#{key}'" if values.empty?
-
-        # terms[key] = values.sample
-        properties.push Property.new(constraint(key), values.sample)
-      end
-      Piece.new(object, properties)
-    end
-
-    # @param selected_values [Hash]
-    # @param selected [Boolean]
-    # @return [Hash]
-    def generate_constraint_repo(selected_values, selected)
-      repo = {}
-      # Setting a fixed term ensures that at least one solution term will not
-      # be duplicated by another piece
-      fixed_term = selected_values.keys.sample
-      constraints.each do |c|
-        repo[c.name] = if selected_values.key?(c.name)
-                         if selected
-                           [selected_values[c.name]]
-                         elsif c.name == fixed_term
-                           limit_available_values(c, selected_values[fixed_term], selected)
-                         else
-                           limit_available_values(c, nil, false)
-                         end
-                       else
-                         limit_available_values(c, nil, selected)
-                       end
-      end
-      repo
-    end
-
-    # @param constraint [Constraint]
-    # @param exception [String]
-    # @param selected [Boolean]
-    # @return [Array<String>]
-    def limit_available_values(constraint, exception, selected)
-      available = (selected ? constraint.reserves : constraint.values) - [exception]
-      filtered = available -
-                 [@solution&.value(constraint.name)] -
-                 (@recur.include?(constraint.name) ? [] : pieces.map { |p| p.value(constraint.name) })
-      filtered.empty? ? available : filtered
-    end
 
     # Create an array of all possible premises for the puzzle.
     #
