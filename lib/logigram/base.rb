@@ -88,25 +88,18 @@ module Logigram
       constraint(key).values & pieces.map { |piece| piece.value(key) }
     end
 
-    # The terms that should be used to identify the solution.
-    #
-    # @return [Array<String>]
-    def solution_terms
-      solution.properties.select { |prop| terms.include?(prop.constraint) }.map(&:name)
-    end
-
     # Shortcut to get the solution terms' values, e.g., "red"
     #
     # @return [Array<String>]
     def solution_values
-      solution_terms.map { |t| @solution.value(t) }
+      solution.properties.map(&:value)
     end
 
     # Shortcut to get the solution terms' predicates, e.g., "is red"
     #
     # @return [Array<String>]
     def solution_predicates
-      solution_terms.map { |t| constraint(t).predicate(@solution.value(t)) }
+      terms.map { |term| term.predicate(solution.value(term.name)) }
     end
 
     # Get the piece associated with an object.
