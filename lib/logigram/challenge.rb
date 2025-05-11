@@ -1,15 +1,25 @@
 # frozen_string_literal: true
 
 module Logigram
+  # Use Logigram::Challenge to generate a list of premises from a puzzle.
+  #
   class Challenge
     # @return [Puzzle]
     attr_reader :puzzle
 
+    # :easy   - all affirmative premises
+    # :medium - mixture of affirmative and negative premises
+    # :hard   - minimal affirmative premises
+    #
+    # @return [Symbol]
     attr_reader :difficulty
 
+    # @param puzzle [Puzzle]
+    # @param difficulty [Symbol] :easy, :medium, or :hard
     def initialize puzzle, difficulty: :medium
       @puzzle = puzzle
       @difficulty = difficulty
+      @premises = generate_premises.shuffle
     end
 
     def premises
