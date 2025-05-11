@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Logigram
   # Use the Logigram::Challenge class to generate a list of clues from a
   # puzzle.

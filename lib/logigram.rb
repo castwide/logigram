@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "logigram/version"
 require 'logigram/constraint'
 require 'logigram/property'

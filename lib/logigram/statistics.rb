@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Logigram
   # A data summary about the pieces and premises of a puzzle.
   #

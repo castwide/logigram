@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Logigram
   # A base class for creating logic puzzles. Authors should not instantiate
   # this class directly, but extend it with their own puzzle implementations.

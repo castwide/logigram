@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Logigram
   # Constraints describe features that puzzle pieces can possess. They are
   # identified by name and have a finite set of possible values. When a puzzle

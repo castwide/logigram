@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Logigram
   class Formatter
     CONJUGATIONS = {
@@ -10,6 +12,6 @@ module Logigram
       own: ['owns', 'own', 'does not own', 'do not own'],
       play: ['plays', 'play', 'does not play', 'do not play'],
       work_as: ['works as', 'work as', 'does not work as', 'do not work as']
-    }
+    }.freeze
   end
 end

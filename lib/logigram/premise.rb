@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Logigram
   # A premise is a fact about a puzzle piece. Puzzles use premises to provide
   # clues.

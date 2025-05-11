@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Logigram
+  # A puzzle generated from constraints and objects.
+  #
   class Puzzle
     # All of the constraints in the puzzle.
     #
