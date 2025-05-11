@@ -28,7 +28,7 @@ module Logigram
     private
 
     def solution_constraints
-      @puzzle.terms
+      @puzzle.determinants
     end
 
     # @return [Array<Constraint>]

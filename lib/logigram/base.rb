@@ -60,18 +60,13 @@ module Logigram
       end
     end
 
-    # Generate a puzzle with the provided configuration.
-    #
-    # The `objects` array is required. If `solution` and `terms` are not provided, they'll be randomly generated.
-    #
     # @param objects [Array<Object>] The piece identifiers
-    # @param selection [Object] Which object to use as the solution
-    # @param terms [String, Constraint, Array<String, Constraint>, nil] The solution term(s) or term name(s)
-    # @param recur [String, Array<String>, nil] Recurring constraints (uniqueness never enforced)
-    def initialize(objects, selection: objects.sample, terms: nil)
-      terms = terms ? [terms].flatten : [self.class.constraints.map(&:name).sample]
-      term_constraints = terms.map { |tm| tm.is_a?(Constraint) ? tm : self.class.constraint(tm) }
-      super(constraints: self.class.constraints, objects: objects, selection: selection, terms: term_constraints)
+    # @param selection [Object] The object to use as the solution
+    # @param determinants [String, Constraint, Array<String, Constraint>] The solution constraints or names
+    def initialize(objects, selection: objects.sample, determinants: self.class.constraints.sample)
+      determinants = [determinants].flatten
+      det_cons = determinants.map { |id| id.is_a?(Constraint) ? id : self.class.constraint(id) }
+      super(constraints: self.class.constraints, objects: objects, selection: selection, determinants: det_cons)
     end
 
     # @param name [String]

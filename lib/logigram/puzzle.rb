@@ -9,10 +9,10 @@ module Logigram
     # @return [Array<Constraint>]
     attr_reader :constraints
 
-    # The constraints that must be solved to determine the solution.
+    # The constraints that must be solved to deduce the solution.
     #
     # @return [Array<Constraint>]
-    attr_reader :terms
+    attr_reader :determinants
 
     # @return [Array<Piece>]
     attr_reader :pieces
@@ -22,14 +22,14 @@ module Logigram
 
     # @param constraints [Array<Constraint>]
     # @param objects [Array<Object>]
-    # @param terms [Constraint, Array<Constraint>]
-    # @param selection [Object]
-    def initialize(constraints:, objects:, terms: constraints.sample, selection: objects.sample)
+    # @param determinants [Constraint, Array<Constraint>]
+    # @param selection [Object] The object to select as the solution
+    def initialize(constraints:, objects:, determinants: constraints.sample, selection: objects.sample)
       @constraints = constraints
-      @terms = [terms].flatten
-      @terms.each { |term| constraints.push term unless constraints.include?(term) }
+      @determinants = [determinants].flatten
+      @determinants.each { |con| constraints.push con unless constraints.include?(con) }
       objects.push selection unless objects.include?(selection)
-      @pieces, @solution = Piece::Factory.make(constraints, @terms, objects, selection)
+      @pieces, @solution = Piece::Factory.make(@constraints, @determinants, objects, selection)
     end
 
     # @return [Array<Premise>]

@@ -53,7 +53,7 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog'])
-    expect(puzzle.terms.map(&:name)).to eq(['color'])
+    expect(puzzle.determinants.map(&:name)).to eq(['color'])
     expect(puzzle.solution.properties.map(&:predicate)).to eq(['is red'])
   end
 
@@ -64,8 +64,8 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog'])
-    expect(puzzle.terms).to be_one
-    expect(['color', 'size']).to include(puzzle.terms.first.name)
+    expect(puzzle.determinants).to be_one
+    expect(['color', 'size']).to include(puzzle.determinants.first.name)
   end
 
   it 'uses reserves for solutions' do
@@ -84,8 +84,8 @@ RSpec.describe Logigram::Base do
       constrain 'height', ['short', 'average', 'tall']
     end
     # @type [Logigram::Base]
-    puzzle = klass.new(['dog', 'cat'], terms: ['color', 'size'])
-    expect(puzzle.terms.map(&:name)).to eq(['color', 'size'])
+    puzzle = klass.new(['dog', 'cat'], determinants: ['color', 'size'])
+    expect(puzzle.determinants.map(&:name)).to eq(['color', 'size'])
   end
 
   it 'allows duplicate values' do

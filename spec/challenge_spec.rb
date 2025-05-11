@@ -36,7 +36,7 @@ RSpec.describe Logigram::Challenge do
       constrain 'height', ['short', 'average', 'tall']
     end
     # @type [Logigram::Base]
-    puzzle = klass.new(['dog', 'cat', 'mouse'], terms: ['color', 'size'])
+    puzzle = klass.new(['dog', 'cat', 'mouse'], determinants: ['color', 'size'])
     [:easy, :medium, :hard].each do |diff|
       expect { Logigram::Challenge.new(puzzle, difficulty: diff) }.not_to raise_error
     end
