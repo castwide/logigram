@@ -78,13 +78,6 @@ module Logigram
       self.class.constraint name
     end
 
-    # Shortcut to get the solution terms' values, e.g., "red"
-    #
-    # @return [Array<String>]
-    def solution_values
-      solution.properties.map(&:value)
-    end
-
     # Shortcut to get the solution terms' predicates, e.g., "is red"
     #
     # @return [Array<String>]

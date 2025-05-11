@@ -109,10 +109,10 @@ RSpec.describe Logigram::Base do
     # though the other two terms will always be the same. For example, if the
     # solution piece is red, the other pieces will both be green.
     puzzle = klass.new(['pencil', 'pen', 'crayon'])
-    solution = puzzle.solution_values.first
+    solution = puzzle.solution.properties.first.value
     matches = puzzle.pieces.select { |piece| piece.value('color') == solution }
     expect(matches).to be_one
-    expect(puzzle.solution_values).to eq([solution])
+    expect(puzzle.solution.properties.map(&:value)).to eq([solution])
   end
 
   it 'raises errors for insufficient constraint values' do
