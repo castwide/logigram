@@ -55,7 +55,7 @@ module Logigram
       # puzzle.constraints.shuffle.each do |con|
       sorted_constraints.each do |con|
         if unique_solution_determinants.include?(con)
-          # Give the first a positive premise
+          # Give the first herring a positive premise
           first = herrings.shuffle.first
           value = first.value(con.name)
           result.push Premise.new(first, con, value, last_constraint)
@@ -76,11 +76,10 @@ module Logigram
           last_constraint = nil
         elsif unique_constraints.include?(con)
           # Give one a positive premise
-          first = puzzle.pieces.shuffle.first
-          value = first.value(con.name)
-          result.push Premise.new(first, first.property(con.name), value, last_constraint)
+          mixup = puzzle.pieces.shuffle
+          here = mixup.pop
+          result.push Premise.new(here, con, here.value(con.name), last_constraint)
           # Give the rest varying premises based on difficulty
-          mixup = puzzle.pieces.shuffle - [first]
           until mixup.one?
             here = mixup.pop
             if difficulty == :easy || (difficulty == :medium && positive)
