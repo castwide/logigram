@@ -60,7 +60,7 @@ module Logigram
     # @return [Array<Logigram::Premise>]
     def generate_piece_premises(piece)
       result = []
-      piece.terms.each do |t|
+      piece.properties.map(&:name).each do |t|
         # Positive specific
         result.push Premise.new(piece, constraint(t), piece.value(t))
         term_values = pieces.map { |piece| piece.value(t) }

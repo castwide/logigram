@@ -5,7 +5,7 @@ module Logigram
     # @return [Object]
     attr_reader :object
 
-    # @return [Array<Properties>]
+    # @return [Array<Property>]
     attr_reader :properties
 
     # @param object [Object]
@@ -19,9 +19,9 @@ module Logigram
       object.to_s
     end
 
-    def terms
-      properties.map(&:name)
-    end
+    # def terms
+    #   properties.map(&:name)
+    # end
 
     def value key
       properties.find { |prop| prop.name == key }
