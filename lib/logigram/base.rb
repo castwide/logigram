@@ -166,13 +166,14 @@ module Logigram
     # @return [Piece]
     def generate_piece(object, selected_values, selected)
       constraint_repo = generate_constraint_repo(selected_values, selected)
-      terms = {}
+      properties = []
       constraint_repo.each_pair do |key, values|
         raise "Unable to select value for constraint '#{key}'" if values.empty?
 
-        terms[key] = values.sample
+        # terms[key] = values.sample
+        properties.push Property.new(constraint(key), values.sample)
       end
-      Piece.new(object, terms)
+      Piece.new(object, properties)
     end
 
     # @param selected_values [Hash]

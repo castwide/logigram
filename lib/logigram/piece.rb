@@ -3,12 +3,15 @@ module Logigram
     # @return [Object]
     attr_reader :object
 
+    # @return [Array<Properties>]
+    attr_reader :properties
+
     # @param object [Object]
-    # @param terms [Hash]
+    # @param terms [Array<Property>]
     # @param name [String]
-    def initialize object, terms, name: nil
+    def initialize object, properties, name: nil
       @object = object
-      @terms = terms
+      @properties = properties
       @name = name
     end
 
@@ -16,19 +19,13 @@ module Logigram
       @name || object.to_s
     end
 
-    # Get the value assigned to this piece for the specified term.
-    #
-    # @param term [String] The name of a constraint
-    # @return [Object]
-    def value term
-      @terms[term]
+    def terms
+      properties.map(&:name)
     end
 
-    # The names of all the constraints associated with this piece.
-    #
-    # @return [Array<String>]
-    def terms
-      @terms.keys
+    def value key
+      properties.find { |prop| prop.name == key }
+                &.value
     end
 
     def to_s

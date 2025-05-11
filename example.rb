@@ -22,7 +22,7 @@ puts "The animals are #{puzzle.pieces.join(', ')}"
 puzzle.constraints.each do |c|
   puts "One of each is #{c.values.join(', ')}"
 end
-puts "Which animal #{puzzle.solution_predicate}?"
+puts "Which animal #{puzzle.solution_predicates.first}?"
 
 puts 'Known facts:'
 challenge.clues.each do |c|
@@ -32,4 +32,4 @@ end
 print 'Press enter for the solution....'
 $stdin.gets
 
-puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution_predicate}."
+puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution_predicates.first}."

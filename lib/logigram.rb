@@ -1,5 +1,6 @@
 require "logigram/version"
 require 'logigram/constraint'
+require 'logigram/property'
 require 'logigram/piece'
 require 'logigram/formatter'
 require 'logigram/premise'
