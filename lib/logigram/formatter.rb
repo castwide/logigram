@@ -14,54 +14,61 @@ module Logigram
   #   # Example premise: "the red thing was small"
   #
   class Formatter
+    attr_reader :conjugations
+
     # @param subject [String]
     # @param plural [String]
     # @param verb [Symbol, Array<String>]
     # @param descriptor [String]
-    def initialize subject: 'the %{value} thing', plural: "#{subject}s", verb: :be, descriptor: '%{value}'
-      @conjugations = validate_verb(verb)
+    def initialize(subject: 'the %<value>s thing', plural: "#{subject}s", verb: :be, descriptor: '%<value>s')
+      @conjugations = normalize_verb(verb)
       @subject = subject
       @plural = plural
       @descriptor = descriptor
     end
 
-    def subject value, amount = 1
-      (amount == 1 ? @subject : @plural) % {value: fix_article(value)}
+    def subject(value, amount = 1)
+      format((amount == 1 ? @subject : @plural), value: fix_article(value))
     end
 
-    def predicate value, amount = 1
-      "#{predicate_verb(amount)} #{@descriptor % {value: value}}"
+    def predicate(value, amount = 1)
+      "#{predicate_verb(amount)} #{format(@descriptor, value: value)}"
     end
 
-    def negative value, amount = 1
-      "#{negative_verb(amount)} #{@descriptor % {value: value}}"
+    def negative(value, amount = 1)
+      "#{negative_verb(amount)} #{format(@descriptor, value: value)}"
+    end
+
+    def descriptor(value)
+      format(@descriptor, value: value)
     end
 
     private
 
-    def predicate_verb amount
+    def predicate_verb(amount)
       amount == 1 ? @conjugations[0] : @conjugations[1]
     end
 
-    def negative_verb amount
+    def negative_verb(amount)
       amount == 1 ? @conjugations[2] : @conjugations[3]
     end
 
     def fix_article(value)
-      return value unless @subject.include?('the %{value}')
+      return value unless @subject.include?('the %<value>s')
+
       value.to_s.sub(/^(a|an) /, '')
     end
 
     # @return [Array<String>]
-    def validate_verb verb
+    def normalize_verb(verb)
       CONJUGATIONS[verb] ||
         validate_conjugation(verb) ||
         raise(ArgumentError, 'Verb must be a predefined infinitive or an array of verb forms')
     end
 
     # @return [Array<String>]
-    def validate_conjugation verb
-      return verb if verb.is_a?(Array) && verb.length == 4
+    def validate_conjugation(verb)
+      verb if verb.is_a?(Array) && verb.length == 4
     end
   end
 

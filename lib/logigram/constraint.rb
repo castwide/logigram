@@ -63,6 +63,14 @@ module Logigram
       formatter.negative(value, quantity)
     end
 
+    def to_s
+      "#<#{self.class} '#{name}'>"
+    end
+
+    def inspect
+      to_s
+    end
+
     private
 
     # @raise [ArgumentError] if the value is not valid

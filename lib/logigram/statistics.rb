@@ -15,7 +15,7 @@ module Logigram
 
     # @return [Hash]
     def raw_data
-      @raw_data ||= generate_statistics
+      @raw_data ||= Datasets.constraint_tables(@puzzle)
     end
 
     # @return [Array<String>]
@@ -27,19 +27,6 @@ module Logigram
 
     def noun qty
       qty == 1 ? @subject : @plural
-    end
-
-    def generate_statistics
-      stats = {}
-      @puzzle.constraints.each do |con|
-        values = {}
-        @puzzle.pieces.each do |pc|
-          values[pc.value(con.name)] ||= 0
-          values[pc.value(con.name)] += 1
-        end
-        stats[con.name] = values
-      end
-      stats
     end
 
     def generate_statements
