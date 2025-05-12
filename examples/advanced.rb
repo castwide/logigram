@@ -20,7 +20,7 @@ constraints = [
     'address',
     ['Cleveland', 'Boston', 'Denver', 'San Diego', 'Atlanta'],
     unique: false,
-    formatter: Logigram::Formatter.new(subject: 'the suspect from %<value>s', descriptor: 'from %<value>s')
+    formatter: Logigram::Formatter.new(subject: 'the suspect from %<value>s', verb: :live_in, descriptor: '%<value>s')
   )
 ]
 
