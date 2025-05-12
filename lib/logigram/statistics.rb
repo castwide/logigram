@@ -31,8 +31,7 @@ module Logigram
 
     def generate_statements
       lines = []
-      raw_data.each_pair do |key, values|
-        con = @puzzle.constraint(key)
+      raw_data.each_pair do |con, values|
         values.each_pair do |val, qty|
           lines.push "#{qty} #{noun(qty)} #{con.predicate(val, qty)}"
         end
