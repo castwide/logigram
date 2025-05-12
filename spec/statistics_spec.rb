@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Logigram::Statistics do
   it 'counts determinant values' do
     # @type [Class<Logigram::Base>]

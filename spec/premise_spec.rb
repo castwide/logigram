@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Logigram::Premise do
   it 'identifies its subject by name' do
     constraint = Logigram::Constraint.new('color', ['red', 'blue'])

@@ -1,4 +1,4 @@
-require 'ostruct'
+# frozen_string_literal: true
 
 RSpec.describe Logigram::Piece do
   it 'sets names from objects' do
