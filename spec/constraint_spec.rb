@@ -21,4 +21,11 @@ RSpec.describe Logigram::Constraint do
       Logigram::Constraint.new('color', ['red', 'blue'], reserve: 'green')
     }.to raise_error(ArgumentError)
   end
+
+  describe '#inspect' do
+    it 'surfaces its names' do
+      constraint = Logigram::Constraint.new('constraint_name', [1, 2, 3])
+      expect(constraint.inspect).to include('constraint_name')
+    end
+  end
 end
