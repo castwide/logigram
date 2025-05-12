@@ -19,10 +19,6 @@ module Logigram
       object.to_s
     end
 
-    # def terms
-    #   properties.map(&:name)
-    # end
-
     def property key
       properties.find { |prop| prop.constraint.name == key }
     end
