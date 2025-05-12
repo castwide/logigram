@@ -52,10 +52,8 @@ module Logigram
     end
 
     def sorted_constraints
-      # The first constraint to be used for generating clues should not be a
-      # determinant
-      first = (puzzle.constraints - puzzle.determinants).sample
-      ([first] + (puzzle.constraints - [first])).compact
+      # Premises for determinants should always be generated last
+      (puzzle.constraints - puzzle.determinants).shuffle + puzzle.determinants.shuffle
     end
 
     def generate_premises
