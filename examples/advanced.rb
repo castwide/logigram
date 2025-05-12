@@ -32,11 +32,11 @@ puts "The suspects are #{puzzle.pieces.join(', ')}"
 tables = Logigram::Datasets.constraint_tables(puzzle)
 tables.each do |constraint, data|
   if data.values.all? { |cnt| cnt == 1 }
-    puts "1 of each #{constraint.formatter.conjugations[0]} #{data.keys.map { |val| constraint.formatter.descriptor(val) }.join(', ')}"
+    puts "1 of each #{constraint.formatter.conjugations[0]} #{data.keys.map { |val| constraint.formatter.descriptor(val) }.shuffle.join(', ')}"
   else
-    data.each do |value, count|
-      puts "#{count} #{constraint.formatter.conjugations[count > 1 ? 1 : 0]} #{constraint.formatter.descriptor(value)}"
-    end
+    out = data.map { |value, count| "#{count} #{constraint.formatter.conjugations[count > 1 ? 1 : 0]} #{constraint.formatter.descriptor(value)}" }
+              .shuffle
+    puts out
   end
 end
 
