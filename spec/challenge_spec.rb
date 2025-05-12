@@ -64,7 +64,7 @@ RSpec.describe Logigram::Challenge do
     puzzle = Logigram::Puzzle.new(constraints: [con1, con2, con3], objects: %w[shirt hat socks pants],
                                   determinants: [con1, con2])
     %i[easy medium hard].each do |diff|
-      expect { Logigram::Challenge.new(puzzle, difficulty: diff) }.not_to raise_error
+      expect { Logigram::Challenge.new(puzzle, difficulty: diff).premises }.not_to raise_error
     end
   end
 end

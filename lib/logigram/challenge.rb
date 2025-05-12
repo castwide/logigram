@@ -16,10 +16,9 @@ module Logigram
 
     # @param puzzle [Puzzle]
     # @param difficulty [Symbol] :easy, :medium, or :hard
-    def initialize puzzle, difficulty: :medium
+    def initialize(puzzle, difficulty: :medium)
       @puzzle = puzzle
       @difficulty = difficulty
-      @premises = generate_premises.shuffle
     end
 
     def premises
@@ -62,84 +61,106 @@ module Logigram
     def generate_premises
       result = []
       last_constraint = nil
-      positive = false
-      # puzzle.constraints.shuffle.each do |con|
       sorted_constraints.each do |con|
         if unique_solution_determinants.include?(con)
-          # Give the first herring a positive premise
-          first = herrings.shuffle.first
-          value = first.value(con.name)
-          result.push Premise.new(first, con, value, last_constraint)
-          # Give the rest varying premises based on difficulty
-          mixup = puzzle.pieces.shuffle - [first]
-          until mixup.one?
-            here = mixup.pop
-            if difficulty == :easy || (difficulty == :medium && positive)
-              result.push Premise.new(here, con, here.value(con.name), last_constraint)
-            else
-              result.push Premise.new(here, con, mixup.first.value(con.name), last_constraint)
-            end
-            positive = !positive
-          end
+          result.concat generate_unique_solution_determinant_premises(con, last_constraint)
           last_constraint = con
         elsif ambiguous_solution_determinants.include?(con)
-          # Give the first herring a positive premise
-          ambiguous_value = puzzle.solution.value(con.name)
-          first = herrings.select { |piece| piece.value(con.name) == ambiguous_value }.sample
-          result.push Premise.new(first, con, ambiguous_value, nil)
-          # Give the rest varying premises based on difficulty
-          mixup = puzzle.pieces.shuffle - [first]
-          until mixup.empty?
-            here = mixup.pop
-            if here == puzzle.solution && difficulty != :easy
-              other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
-              result.push Premise.new(here, con, other_value, nil)
-            else
-              if difficulty == :easy || (difficulty == :medium && positive)
-                result.push Premise.new(here, con, here.value(con.name), nil)
-              else
-                result.push Premise.new(here, con, ambiguous_value, nil)
-              end
-            end
-            positive = !positive
-          end
+          result.concat generate_ambiguous_solution_determinant_premises(con, last_constraint)
           last_constraint = nil
         elsif unique_constraints.include?(con)
-          # Give one a positive premise
-          mixup = puzzle.pieces.shuffle
-          here = mixup.pop
-          result.push Premise.new(here, con, here.value(con.name), last_constraint)
-          # Give the rest varying premises based on difficulty
-          until mixup.one?
-            here = mixup.pop
-            if difficulty == :easy || (difficulty == :medium && positive)
-              result.push Premise.new(here, con, here.value(con.name), last_constraint)
-            else
-              result.push Premise.new(here, con, mixup.first.value(con.name), last_constraint)
-            end
-            positive = !positive
-          end
+          result.concat generate_unique_constraint_premises(con, last_constraint)
           last_constraint = con
         else
-          # Ambiguous constraint
-          ambiguous_value = puzzle.solution.value(con.name)
-          mixup = puzzle.pieces.shuffle
-          until mixup.empty?
-            here = mixup.pop
-            if here == puzzle.solution && difficulty != :easy
-              other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
-              result.push Premise.new(here, con, other_value, nil)
-            else
-              if difficulty == :easy || (difficulty == :medium && positive)
-                result.push Premise.new(here, con, here.value(con.name), nil)
-              else
-                result.push Premise.new(here, con, ambiguous_value, nil)
-              end
-            end
-            positive = !positive
-          end
+          result.concat generate_ambiguous_constraint_premises(con, last_constraint)
           last_constraint = nil
         end
+      end
+      result
+    end
+
+    def generate_unique_solution_determinant_premises(con, last_constraint)
+      result = []
+      positive = false
+      # Give the first herring a positive premise
+      first = herrings.sample
+      value = first.value(con.name)
+      result.push Premise.new(first, con, value, last_constraint)
+      # Give the rest varying premises based on difficulty
+      mixup = puzzle.pieces.shuffle - [first]
+      until mixup.one?
+        here = mixup.pop
+        if difficulty == :easy || (difficulty == :medium && positive)
+          result.push Premise.new(here, con, here.value(con.name), last_constraint)
+        else
+          result.push Premise.new(here, con, mixup.first.value(con.name), last_constraint)
+        end
+        positive = !positive
+      end
+      result
+    end
+
+    def generate_ambiguous_solution_determinant_premises(con, _last_constraint)
+      result = []
+      positive = false
+      # Give the first herring a positive premise
+      ambiguous_value = puzzle.solution.value(con.name)
+      first = herrings.select { |piece| piece.value(con.name) == ambiguous_value }.sample
+      result.push Premise.new(first, con, ambiguous_value, nil)
+      # Give the rest varying premises based on difficulty
+      mixup = puzzle.pieces.shuffle - [first]
+      until mixup.empty?
+        here = mixup.pop
+        if here == puzzle.solution && difficulty != :easy
+          other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
+          result.push Premise.new(here, con, other_value, nil)
+        elsif difficulty == :easy || (difficulty == :medium && positive)
+          result.push Premise.new(here, con, here.value(con.name), nil)
+        else
+          result.push Premise.new(here, con, ambiguous_value, nil)
+        end
+        positive = !positive
+      end
+      result
+    end
+
+    def generate_unique_constraint_premises(con, last_constraint)
+      result = []
+      positive = false
+      # Give one a positive premise
+      mixup = puzzle.pieces.shuffle
+      here = mixup.pop
+      result.push Premise.new(here, con, here.value(con.name), last_constraint)
+      # Give the rest varying premises based on difficulty
+      until mixup.one?
+        here = mixup.pop
+        if difficulty == :easy || (difficulty == :medium && positive)
+          result.push Premise.new(here, con, here.value(con.name), last_constraint)
+        else
+          result.push Premise.new(here, con, mixup.first.value(con.name), last_constraint)
+        end
+        positive = !positive
+      end
+      result
+    end
+
+    def generate_ambiguous_constraint_premises(con, _last_constraint)
+      result = []
+      positive = false
+      # Ambiguous constraint
+      ambiguous_value = puzzle.solution.value(con.name)
+      mixup = puzzle.pieces.shuffle
+      until mixup.empty?
+        here = mixup.pop
+        if here == puzzle.solution && difficulty != :easy
+          other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
+          result.push Premise.new(here, con, other_value, nil)
+        elsif difficulty == :easy || (difficulty == :medium && positive)
+          result.push Premise.new(here, con, here.value(con.name), nil)
+        else
+          result.push Premise.new(here, con, ambiguous_value, nil)
+        end
+        positive = !positive
       end
       result
     end
