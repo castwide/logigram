@@ -109,7 +109,7 @@ module Logigram
       result.push Premise.new(first, con, ambiguous_value, nil)
       # Give the rest varying premises based on difficulty
       mixup = puzzle.pieces.shuffle - [first]
-      until mixup.empty?
+      until mixup.one?
         here = mixup.pop
         if here == puzzle.solution && difficulty != :easy
           other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
@@ -150,7 +150,7 @@ module Logigram
       # Ambiguous constraint
       ambiguous_value = puzzle.solution.value(con.name)
       mixup = puzzle.pieces.shuffle
-      until mixup.empty?
+      until mixup.one?
         here = mixup.pop
         if here == puzzle.solution && difficulty != :easy
           other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
