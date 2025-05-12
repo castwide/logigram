@@ -1,5 +1,5 @@
 RSpec.describe Logigram::Statistics do
-  it 'counts term values' do
+  it 'counts determinant values' do
     # @type [Class<Logigram::Base>]
     klass = Class.new(Logigram::Base) do
       constrain 'color', ['red', 'green'], reserve: 'red', unique: false

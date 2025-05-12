@@ -29,7 +29,7 @@ RSpec.describe Logigram::Challenge do
     expect(challenge.clues.select(&:affirmative?).length).to eq(2)
   end
 
-  it 'supports multiple terms' do
+  it 'supports multiple determinants' do
     klass = Class.new(Logigram::Base) do
       constrain 'color', %w[red green blue]
       constrain 'size', %w[small medium large]

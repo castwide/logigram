@@ -12,12 +12,12 @@ module Logigram
       attr_reader :solution
 
       # @param constraints [Array<Constraint>]
-      # @param terms [Array<Constraint>]
+      # @param determinants [Array<Constraint>]
       # @param objects [Array<Object>]
       # @param selection [Object]
-      def initialize(constraints, terms, objects, selection)
+      def initialize(constraints, determinants, objects, selection)
         @constraints = constraints
-        @terms = terms
+        @determinants = determinants
         @solution = generate_solution(selection)
         @pieces = generate_pieces(objects)
       end
@@ -25,12 +25,12 @@ module Logigram
       # Generate puzzle pieces from provided constraints and objects.
       #
       # @param constraints [Array<Constraint>]
-      # @param terms [Array<Constraint>]
+      # @param determinants [Array<Constraint>]
       # @param objects [Array<Object>]
       # @param selection [Object]
       # @return [Array(Array<Piece>, Piece)]
-      def self.make(constraints, terms, objects, selection)
-        fac = new(constraints, terms, objects, selection)
+      def self.make(constraints, determinants, objects, selection)
+        fac = new(constraints, determinants, objects, selection)
         [fac.pieces, fac.solution]
       end
 
@@ -40,7 +40,7 @@ module Logigram
       attr_reader :constraints
 
       # @return [Array<Constraint>]
-      attr_reader :terms
+      attr_reader :determinants
 
       # @param objects [Array<Object>]
       def generate_pieces(objects)
@@ -89,7 +89,7 @@ module Logigram
         # @todo In addition to guaranteeing a unique solution, we should verify
         #   there's never a case where all the pieces have the same value for a
         #   property.
-        check = properties.select { |prop| terms.include?(prop.constraint) }
+        check = properties.select { |prop| determinants.include?(prop.constraint) }
         conflicts = check.select { |prop| prop.value == solution.value(prop.constraint.name) }
         return properties if conflicts.length < check.length
 

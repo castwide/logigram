@@ -47,7 +47,7 @@ RSpec.describe Logigram::Base do
     expect(puzzle.solution.properties.map(&:predicate)).to eq(['is red'])
   end
 
-  it 'sets a random solution term' do
+  it 'sets a random determinant' do
     klass = Class.new(Logigram::Base) do
       constrain 'color', ['red']
       constrain 'size', ['small']
@@ -67,7 +67,7 @@ RSpec.describe Logigram::Base do
     expect(puzzle.solution.value('color')).to eq('blue')
   end
 
-  it 'supports multiple terms' do
+  it 'supports multiple determinants' do
     klass = Class.new(Logigram::Base) do
       constrain 'color', ['red', 'green', 'blue']
       constrain 'size', ['small', 'medium', 'large']
@@ -90,14 +90,14 @@ RSpec.describe Logigram::Base do
     end
   end
 
-  it 'sets unique solution terms' do
+  it 'sets unique determinants' do
     # @type [Class<Logigram::Base>]
     klass = Class.new(Logigram::Base) do
       constrain 'color', ['red', 'green'], unique: false
     end
-    # This should succeed because the solution term can always be unique, even
-    # though the other two terms will always be the same. For example, if the
-    # solution piece is red, the other pieces will both be green.
+    # This should succeed because the determinant can always be unique, even
+    # though the other two constraints will always be the same. For example,
+    # if the solution piece is red, the other pieces will both be green.
     puzzle = klass.new(['pencil', 'pen', 'crayon'])
     solution = puzzle.solution.properties.first.value
     matches = puzzle.pieces.select { |piece| piece.value('color') == solution }
@@ -110,7 +110,7 @@ RSpec.describe Logigram::Base do
       constrain 'color', ['red']
     end
     expect {
-      # This should fail because the solution term requires a unique value, but
+      # This should fail because the determinant requires a unique value, but
       # all three pieces will be red.
       klass.new(['pencil', 'pen', 'crayon'])
     }.to raise_error(RuntimeError)
