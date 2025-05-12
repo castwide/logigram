@@ -22,7 +22,7 @@ Or install it yourself as:
 
 ## Usage
 
-See [example.rb](example.rb) for a simple demonstration.
+See the [examples](examples) directory for simple and advanced demonstrations.
 
 ## TODO:
 
