@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Logigram
+  # An element of a puzzle.
+  #
   class Piece
     # @return [Object]
     attr_reader :object
@@ -10,7 +12,7 @@ module Logigram
 
     # @param object [Object]
     # @param properties [Array<Property>]
-    def initialize object, properties
+    def initialize(object, properties)
       @object = object
       @properties = properties
     end
@@ -19,11 +21,11 @@ module Logigram
       object.to_s
     end
 
-    def property key
+    def property(key)
       properties.find { |prop| prop.constraint.name == key }
     end
 
-    def value key
+    def value(key)
       properties.find { |prop| prop.name == key }
                 &.value
     end

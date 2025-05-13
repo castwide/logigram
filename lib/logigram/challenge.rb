@@ -12,7 +12,7 @@ module Logigram
 
     # @param puzzle [Puzzle]
     # @param difficulty [Symbol] :easy, :medium, or :hard
-    def initialize puzzle, difficulty: :medium
+    def initialize(puzzle, difficulty: :medium)
       @puzzle = puzzle
       @difficulty = difficulty
     end
@@ -87,7 +87,9 @@ module Logigram
 
     def random_unique_constraint
       @random_unique_constraints ||= (unique_constraints + unique_determinants).shuffle
-      @random_unique_constraints.replace((unique_constraints + unique_determinants).shuffle) if @random_unique_constraints.empty?
+      if @random_unique_constraints.empty?
+        @random_unique_constraints.replace((unique_constraints + unique_determinants).shuffle)
+      end
       @random_unique_constraints.pop
     end
   end

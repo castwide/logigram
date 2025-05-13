@@ -1,16 +1,22 @@
 # frozen_string_literal: true
 
 module Logigram
+  # A fact about a puzzle piece.
+  #
+  # A Challenge provides a list of premises that can be used to deduce the
+  # solution to its puzzle.
+  #
   class Premise
     attr_reader :piece, :constraint, :value, :identifier
 
-    def initialize piece, constraint, value, identifier = nil
+    def initialize(piece, constraint, value, identifier = nil)
       @piece = piece
       @constraint = constraint
       @value = value
       @identifier = identifier
     end
 
+    # @return [Property]
     def property
       piece.property(constraint.name)
     end

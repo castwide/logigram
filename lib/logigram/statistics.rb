@@ -7,7 +7,7 @@ module Logigram
   # @param subject [String]
   # @param plural [String]
   class Statistics
-    def initialize puzzle, subject: 'thing', plural: "#{subject}s"
+    def initialize(puzzle, subject: 'thing', plural: "#{subject}s")
       @puzzle = puzzle
       @subject = subject
       @plural = plural
@@ -25,7 +25,7 @@ module Logigram
 
     private
 
-    def noun qty
+    def noun(qty)
       qty == 1 ? @subject : @plural
     end
 

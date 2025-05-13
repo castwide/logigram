@@ -10,7 +10,7 @@ module Logigram
     # @return [Object]
     attr_reader :value
 
-    def initialize constraint, value
+    def initialize(constraint, value)
       @constraint = constraint
       @value = value
     end
