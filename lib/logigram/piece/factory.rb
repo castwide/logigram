@@ -43,13 +43,14 @@ module Logigram
       attr_reader :determinants
 
       # @param objects [Array<Object>]
+      # @return [Array<Piece>]
       def generate_pieces(objects)
-        drop = true
-        objects.map do |object|
-          # Always drop the first selected value of non-unique constraints to
-          # improve the likelihood of variety
-          object == solution.object ? solution : generate_candidate(object, drop).tap { drop = false }
-        end
+        candidates = objects - [solution.object]
+        candidates.map
+                  # Always drop the first selected value of non-unique constraints to
+                  # improve the likelihood of variety
+                  .with_index { |obj, idx| generate_candidate(obj, idx == candidates.length - 2) }
+                  .push(solution)
       end
 
       # @param object [Object]
