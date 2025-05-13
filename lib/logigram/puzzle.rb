@@ -46,6 +46,10 @@ module Logigram
       constraints.find { |con| con.name == name }
     end
 
+    def herrings
+      @herrings ||= pieces - [solution]
+    end
+
     def to_challenge(difficulty: :medium)
       Challenge.new(self, difficulty: difficulty)
     end
