@@ -34,7 +34,7 @@ module Logigram
         last_constraint = constraint
       end
       ambiguous_constraints.each do |constraint|
-        result.concat generate_unique_premises(constraint, pieces, last_constraint)
+        result.concat generate_unique_premises(constraint, pieces, random_unique_constraint)
         shuffle_pieces!(pieces)
       end
       unique_determinants.each do |constraint|
@@ -43,7 +43,7 @@ module Logigram
         last_constraint = constraint
       end
       ambiguous_determinants.each do |constraint|
-        result.concat generate_unique_premises(constraint, pieces, last_constraint)
+        result.concat generate_unique_premises(constraint, pieces, random_unique_constraint)
         shuffle_pieces!(pieces)
       end
       result
@@ -89,6 +89,12 @@ module Logigram
 
     def ambiguous_constraints
       @ambiguous_constraints ||= puzzle.constraints - puzzle.determinants - unique_constraints
+    end
+
+    def random_unique_constraint
+      @random_unique_constraints ||= (unique_constraints + unique_determinants).shuffle
+      @random_unique_constraints.replace((unique_constraints + unique_determinants).shuffle) if @random_unique_constraints.empty?
+      @random_unique_constraints.pop
     end
   end
 end
