@@ -28,15 +28,15 @@ module Logigram
 
     private
 
-    def unique_solution_determinants
-      @unique_solution_determinants ||= puzzle.determinants.select do |det|
+    def unique_determinants
+      @unique_determinants ||= puzzle.determinants.select do |det|
         sol_val = puzzle.solution.value(det.name)
         puzzle.pieces.select { |piece| piece.value(det.name) == sol_val }.one?
       end
     end
 
-    def ambiguous_solution_determinants
-      @ambiguous_solution_determinants ||= puzzle.determinants - unique_solution_determinants
+    def ambiguous_determinants
+      @ambiguous_determinants ||= puzzle.determinants - unique_determinants
     end
 
     def unique_constraints
@@ -60,12 +60,12 @@ module Logigram
       result = []
       last_constraint = nil
       sorted_constraints.each_with_index do |con, idx|
-        if unique_solution_determinants.include?(con)
+        if unique_determinants.include?(con)
           final = idx == (sorted_constraints.length - 1)
-          result.concat generate_unique_solution_determinant_premises(con, final, last_constraint)
+          result.concat generate_unique_determinant_premises(con, final, last_constraint)
           last_constraint = con
-        elsif ambiguous_solution_determinants.include?(con)
-          result.concat generate_ambiguous_solution_determinant_premises(con, final, last_constraint)
+        elsif ambiguous_determinants.include?(con)
+          result.concat generate_ambiguous_determinant_premises(con, final, last_constraint)
           last_constraint = nil
         elsif unique_constraints.include?(con)
           result.concat generate_unique_constraint_premises(con, final, last_constraint)
@@ -78,7 +78,7 @@ module Logigram
       result
     end
 
-    def generate_unique_solution_determinant_premises(con, final, last_constraint)
+    def generate_unique_determinant_premises(con, final, last_constraint)
       result = []
       positive = false
       # Give the first herring a positive premise
@@ -99,7 +99,7 @@ module Logigram
       result
     end
 
-    def generate_ambiguous_solution_determinant_premises(con, final, _last_constraint)
+    def generate_ambiguous_determinant_premises(con, final, _last_constraint)
       result = []
       positive = false
       # Give the first herring a positive premise
