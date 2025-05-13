@@ -53,31 +53,32 @@ module Logigram
 
     def sorted_constraints
       # Premises for determinants should always be generated last
-      (puzzle.constraints - puzzle.determinants).shuffle + puzzle.determinants.shuffle
+      @sorted_constraints ||= (puzzle.constraints - puzzle.determinants).shuffle + puzzle.determinants.shuffle
     end
 
     def generate_premises
       result = []
       last_constraint = nil
-      sorted_constraints.each do |con|
+      sorted_constraints.each_with_index do |con, idx|
         if unique_solution_determinants.include?(con)
-          result.concat generate_unique_solution_determinant_premises(con, last_constraint)
+          final = idx == (sorted_constraints.length - 1)
+          result.concat generate_unique_solution_determinant_premises(con, final, last_constraint)
           last_constraint = con
         elsif ambiguous_solution_determinants.include?(con)
-          result.concat generate_ambiguous_solution_determinant_premises(con, last_constraint)
+          result.concat generate_ambiguous_solution_determinant_premises(con, final, last_constraint)
           last_constraint = nil
         elsif unique_constraints.include?(con)
-          result.concat generate_unique_constraint_premises(con, last_constraint)
+          result.concat generate_unique_constraint_premises(con, final, last_constraint)
           last_constraint = con
         else
-          result.concat generate_ambiguous_constraint_premises(con, last_constraint)
+          result.concat generate_ambiguous_constraint_premises(con, final, last_constraint)
           last_constraint = nil
         end
       end
       result
     end
 
-    def generate_unique_solution_determinant_premises(con, last_constraint)
+    def generate_unique_solution_determinant_premises(con, final, last_constraint)
       result = []
       positive = false
       # Give the first herring a positive premise
@@ -86,7 +87,7 @@ module Logigram
       result.push Premise.new(first, con, value, last_constraint)
       # Give the rest varying premises based on difficulty
       mixup = puzzle.pieces.shuffle - [first]
-      until mixup.one?
+      until final ? mixup.one? : mixup.length < 3
         here = mixup.pop
         if difficulty == :easy || (difficulty == :medium && positive)
           result.push Premise.new(here, con, here.value(con.name), last_constraint)
@@ -98,7 +99,7 @@ module Logigram
       result
     end
 
-    def generate_ambiguous_solution_determinant_premises(con, _last_constraint)
+    def generate_ambiguous_solution_determinant_premises(con, final, _last_constraint)
       result = []
       positive = false
       # Give the first herring a positive premise
@@ -107,7 +108,7 @@ module Logigram
       result.push Premise.new(first, con, ambiguous_value, nil)
       # Give the rest varying premises based on difficulty
       mixup = puzzle.pieces.shuffle - [first]
-      until mixup.one?
+      until final ? mixup.one? : mixup.length < 3
         here = mixup.pop
         if here == puzzle.solution && difficulty != :easy
           other_value = puzzle.pieces.map { |pc| pc.value(con.name) }.sample
@@ -122,7 +123,7 @@ module Logigram
       result
     end
 
-    def generate_unique_constraint_premises(con, last_constraint)
+    def generate_unique_constraint_premises(con, _final, last_constraint)
       result = []
       positive = false
       # Give one a positive premise
@@ -142,7 +143,7 @@ module Logigram
       result
     end
 
-    def generate_ambiguous_constraint_premises(con, _last_constraint)
+    def generate_ambiguous_constraint_premises(con, _final, _last_constraint)
       result = []
       positive = false
       # Ambiguous constraint

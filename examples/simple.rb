@@ -1,5 +1,6 @@
 # A simple example of a Logigram puzzle
 
+require 'bundler/setup'
 require 'logigram'
 
 class Puzzle < Logigram::Base

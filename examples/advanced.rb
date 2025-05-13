@@ -25,7 +25,7 @@ constraints = [
 ]
 
 puzzle = Logigram::Puzzle.new(constraints: constraints, objects: %w[Bob Sam Jan])
-challenge = Logigram::Challenge.new(puzzle, difficulty: :hard)
+challenge = Logigram::Challenge.new(puzzle, difficulty: :medium)
 
 puts "The suspects are #{puzzle.pieces.map(&:name).sort.join(', ')}"
 
