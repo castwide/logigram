@@ -30,27 +30,26 @@ module Logigram
       pieces = puzzle.pieces.shuffle
       unique_constraints.each do |constraint|
         result.concat generate_unique_premises(constraint, pieces, last_constraint)
-        pieces.shuffle!
+        shuffle_pieces!(pieces)
         last_constraint = constraint
       end
       ambiguous_constraints.each do |constraint|
         result.concat generate_unique_premises(constraint, pieces, last_constraint)
-        pieces.shuffle!
+        shuffle_pieces!(pieces)
       end
       unique_determinants.each do |constraint|
         result.concat generate_unique_premises(constraint, pieces, last_constraint)
-        pieces.shuffle!
+        shuffle_pieces!(pieces)
         last_constraint = constraint
       end
       ambiguous_determinants.each do |constraint|
         result.concat generate_unique_premises(constraint, pieces, last_constraint)
-        pieces.shuffle!
+        shuffle_pieces!(pieces)
       end
       result
     end
 
     def shuffle_pieces!(pieces)
-      pieces.shift
       last = pieces.pop
       pieces.shuffle!
       pieces.unshift last
