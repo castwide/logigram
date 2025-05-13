@@ -44,8 +44,11 @@ module Logigram
 
       # @param objects [Array<Object>]
       def generate_pieces(objects)
+        drop = true
         objects.map do |object|
-          object == solution.object ? solution : generate_candidate(object)
+          # Always drop the first selected value of non-unique constraints to
+          # improve the likelihood of variety
+          object == solution.object ? solution : generate_candidate(object, drop).tap { drop = false }
         end
       end
 
@@ -63,13 +66,14 @@ module Logigram
       end
 
       # @param object [Object]
+      # @param drop [Boolean]
       # @return [Piece]
-      def generate_candidate(object)
+      def generate_candidate(object, drop)
         properties = constraints.map do |con|
           value = constraint_repo[con].sample
           raise "Unable to select value for constraint '#{con.name}'" unless value
 
-          constraint_repo[con].delete value if con.unique?
+          constraint_repo[con].delete value if con.unique? || drop
           Property.new(con, value)
         end
         Piece.new(object, validate(properties))
