@@ -4,8 +4,10 @@ module Logigram
   # Use Logigram::Challenge to generate a list of premises from a puzzle.
   #
   class Challenge
+    # @return [Puzzle]
     attr_reader :puzzle
 
+    # @return [Symbol]
     attr_reader :difficulty
 
     # @param puzzle [Puzzle]
@@ -15,6 +17,7 @@ module Logigram
       @difficulty = difficulty
     end
 
+    # @return [Array<Premise>]
     def premises
       @premises ||= generate_premises
     end
@@ -28,21 +31,12 @@ module Logigram
       # The first premise will be affirmative and specific, but since it
       # shouldn't be derived from a determinant, it can be the solution
       pieces = puzzle.pieces.shuffle
-      unique_constraints.each do |constraint|
+      (unique_constraints + unique_determinants).each do |constraint|
         result.concat generate_unique_premises(constraint, pieces, last_constraint)
         shuffle_pieces!(pieces)
         last_constraint = constraint
       end
-      ambiguous_constraints.each do |constraint|
-        result.concat generate_unique_premises(constraint, pieces, random_unique_constraint)
-        shuffle_pieces!(pieces)
-      end
-      unique_determinants.each do |constraint|
-        result.concat generate_unique_premises(constraint, pieces, last_constraint)
-        shuffle_pieces!(pieces)
-        last_constraint = constraint
-      end
-      ambiguous_determinants.each do |constraint|
+      (ambiguous_constraints + ambiguous_determinants).each do |constraint|
         result.concat generate_unique_premises(constraint, pieces, random_unique_constraint)
         shuffle_pieces!(pieces)
       end
