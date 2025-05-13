@@ -43,6 +43,7 @@ module Logigram
       result
     end
 
+    # @return [void]
     def shuffle_pieces!(pieces)
       last = pieces.pop
       pieces.shuffle!
@@ -53,7 +54,7 @@ module Logigram
 
     # @param constraint [Constraint]
     # @param pieces [Array<Piece>]
-    # @param last_constraint [Constraint]
+    # @param last_constraint [Constraint, nil]
     def generate_unique_premises(constraint, pieces, last_constraint)
       pieces[0..-2].map.with_index do |piece, idx|
         if idx.zero? || difficulty == :easy || (difficulty == :medium && idx.even?)

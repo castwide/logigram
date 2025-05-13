@@ -9,6 +9,10 @@ module Logigram
   class Premise
     attr_reader :piece, :constraint, :value, :identifier
 
+    # @param piece [Piece]
+    # @param constraint [Constraint]
+    # @param value [Object]
+    # @param identifier [Constraint, nil]
     def initialize(piece, constraint, value, identifier = nil)
       @piece = piece
       @constraint = constraint

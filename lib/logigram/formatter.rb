@@ -55,20 +55,21 @@ module Logigram
 
     private
 
+    # @param value [String]
     def fix_article(value)
       return value unless @subject.include?('the %<value>s')
 
       value.to_s.sub(/^(a|an) /, '')
     end
 
-    # @return [Array<String>]
+    # @return [String]
     def normalize_verb(verb)
       CONJUGATIONS[verb] ||
         validate_conjugation(verb) ||
         raise(ArgumentError, 'Verb must be a predefined infinitive or an array of verb forms')
     end
 
-    # @return [Array<String>]
+    # @param [String]
     def validate_conjugation(verb)
       verb if verb.is_a?(Array) && verb.length == 4
     end
