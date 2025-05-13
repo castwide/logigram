@@ -91,9 +91,6 @@ module Logigram
       # @param properties [Array<Property>]
       # @return [Array<Property>]
       def validate(properties)
-        # @todo In addition to guaranteeing a unique solution, we should verify
-        #   there's never a case where all the pieces have the same value for a
-        #   property.
         check = properties.select { |prop| determinants.include?(prop.constraint) }
         conflicts = check.select { |prop| prop.value == solution.value(prop.constraint.name) }
         return properties if conflicts.length < check.length
