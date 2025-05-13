@@ -14,8 +14,6 @@ module Logigram
   #   # Example premise: "the red thing was small"
   #
   class Formatter
-    attr_reader :conjugations
-
     # @param subject [String]
     # @param plural [String]
     # @param verb [Symbol, Array<String>]
@@ -43,7 +41,9 @@ module Logigram
       format(@descriptor, value: value)
     end
 
-    private
+    def verb(amount = 1, affirmative = true)
+      affirmative ? predicate_verb(amount) : negative_verb(amount)
+    end
 
     def predicate_verb(amount)
       amount == 1 ? @conjugations[0] : @conjugations[1]
@@ -52,6 +52,8 @@ module Logigram
     def negative_verb(amount)
       amount == 1 ? @conjugations[2] : @conjugations[3]
     end
+
+    private
 
     def fix_article(value)
       return value unless @subject.include?('the %<value>s')

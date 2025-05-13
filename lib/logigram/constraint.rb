@@ -63,6 +63,15 @@ module Logigram
       formatter.negative(value, quantity)
     end
 
+    def descriptor(value)
+      validate value
+      formatter.descriptor(value)
+    end
+
+    def verb(quantity = 1, affirmative = true)
+      formatter.verb(quantity, affirmative)
+    end
+
     def inspect
       "#<#{self.class} '#{name}'>"
     end

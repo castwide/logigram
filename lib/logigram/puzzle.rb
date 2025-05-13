@@ -45,5 +45,9 @@ module Logigram
     def constraint(name)
       constraints.find { |con| con.name == name }
     end
+
+    def to_challenge(difficulty: :medium)
+      Challenge.new(self, difficulty: difficulty)
+    end
   end
 end
