@@ -27,15 +27,16 @@ constraints = [
 puzzle = Logigram::Puzzle.new(constraints: constraints, objects: %w[Bob Sam Jan])
 challenge = Logigram::Challenge.new(puzzle, difficulty: :hard)
 
-puts "The suspects are #{puzzle.pieces.join(', ')}"
+puts "The suspects are #{puzzle.pieces.map(&:name).sort.join(', ')}"
 
 tables = Logigram::Datasets.constraint_tables(puzzle)
 tables.each do |constraint, data|
   if data.values.all? { |cnt| cnt == 1 }
-    puts "1 of each #{constraint.verb} #{data.keys.map { |val| constraint.descriptor(val) }.shuffle.join(', ')}"
+    puts "1 of each #{constraint.verb} #{data.keys.map { |val| constraint.descriptor(val) }.sort.join(', ')}"
   else
-    out = data.map { |value, count| "#{count} #{constraint.verb(count)} #{constraint.descriptor(value)}" }
+    out = data.map { |value, count| "#{count} #{constraint.predicate(value, count)}" }
               .shuffle
+              .sort_by { |str| [str[0, str.index(' ')].to_i * -1, str[str.index(' ')..]] }
     puts out
   end
 end
