@@ -23,6 +23,7 @@ module Logigram
         @options = options
       end
 
+      # @abstract
       # @return [Array<Premise>]
       def premises
         raise 'not implemented'

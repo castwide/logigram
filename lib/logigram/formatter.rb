@@ -73,7 +73,7 @@ module Logigram
     def validate_conjugation(verb)
       verb if verb.is_a?(Array) && verb.length == 4
     end
-  end
 
-  Formatter::DEFAULT = Formatter.new
+    DEFAULT = Formatter.new
+  end
 end
