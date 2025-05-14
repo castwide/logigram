@@ -18,6 +18,7 @@ module Logigram
       end
 
       # @param options [Hash{Symbol => Object}]
+      # @return [void]
       def configure **options
         @options = options
       end

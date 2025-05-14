@@ -56,7 +56,8 @@ module Logigram
       # @param last_constraint [Constraint, nil]
       def next_constraint_premises(constraint, last_constraint)
         shuffled_pieces[0..-2].map.with_index do |piece, idx|
-          premise_value = should_be_easy?(idx) ? piece.value(constraint.name) : shuffled_pieces[-idx].value(constraint.name)
+          key = constraint.name
+          premise_value = should_be_easy?(idx) ? piece.value(key) : shuffled_pieces[-idx].value(key)
           Premise.new(piece, constraint, premise_value, last_constraint)
         end
       end
