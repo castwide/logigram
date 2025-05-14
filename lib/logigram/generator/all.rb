@@ -34,7 +34,7 @@ module Logigram
       # @param property [Property]
       def negative_specific_premises(piece, property)
         (puzzle.pieces - [piece]).map do |other_piece|
-          other_value = other_piece.value(property.constraint.name)
+          other_value = other_piece.value(property.constraint)
           Premise.new(piece, property.constraint, other_value)
         end
       end
@@ -44,7 +44,7 @@ module Logigram
       def negative_generic_premises(piece, property)
         (piece.properties - [property]).map do |other_property|
           (puzzle.pieces - [piece]).each do |other_piece|
-            other_value = other_piece.value(property.constraint.name)
+            other_value = other_piece.value(property.constraint)
             Premise.new(piece, property.constraint, other_value, other_property.constraint)
           end
         end

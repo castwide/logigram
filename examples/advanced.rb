@@ -41,7 +41,7 @@ tables.each do |constraint, data|
   end
 end
 
-puts "Which suspect #{puzzle.solution.property(puzzle.determinants.first.name).predicate}?"
+puts "Which suspect #{puzzle.solution.property(puzzle.determinants.first).predicate}?"
 
 puts 'Known facts:'
 challenge.premises.each do |premise|
@@ -51,4 +51,4 @@ end
 print 'Press enter for the solution....'
 $stdin.gets
 
-puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution.property(puzzle.determinants.first.name).predicate}."
+puts "#{puzzle.solution.to_s.capitalize} #{puzzle.solution.property(puzzle.determinants.first).predicate}."

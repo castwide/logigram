@@ -41,7 +41,7 @@ RSpec.describe Logigram::Generator::Cascade do
     puzzle = klass.new(%w[pencil pen crayon])
     answer = puzzle.solution.value('color')
     (puzzle.pieces - [puzzle.solution]).each do |piece|
-      expect(piece.value('color')).not_to eq(answer)
+      expect(piece.value(klass.constraint('color'))).not_to eq(answer)
     end
     %i[easy medium hard].each do |diff|
       expect { Logigram::Challenge.new(puzzle, generator: Logigram::Generator::Cascade, difficulty: diff) }.not_to raise_error

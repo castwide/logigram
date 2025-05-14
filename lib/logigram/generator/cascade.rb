@@ -7,12 +7,13 @@ module Logigram
     class Cascade < Base
       attr_reader :difficulty
 
-      def configure(difficulty: :medium)
+      def configure(difficulty: :medium, shuffle: true)
         @difficulty = difficulty
+        @shuffle = shuffle
       end
 
       def premises
-        (generate_unique_premises + generate_ambiguous_premises).shuffle
+        (generate_unique_premises + generate_ambiguous_premises).tap { |prems| prems.shuffle! if @shuffle }
       end
 
       private
@@ -56,8 +57,7 @@ module Logigram
       # @param last_constraint [Constraint, nil]
       def next_constraint_premises(constraint, last_constraint)
         shuffled_pieces[0..-2].map.with_index do |piece, idx|
-          key = constraint.name
-          premise_value = should_be_easy?(idx) ? piece.value(key) : shuffled_pieces[-idx].value(key)
+          premise_value = should_be_easy?(idx) ? piece.value(constraint) : shuffled_pieces[-idx].value(constraint)
           Premise.new(piece, constraint, premise_value, last_constraint)
         end
       end
@@ -68,7 +68,7 @@ module Logigram
 
       def unique_determinants
         @unique_determinants ||= puzzle.determinants.select do |con|
-          puzzle.pieces.map { |piece| piece.value(con.name) }.uniq.length == puzzle.pieces.length
+          puzzle.pieces.map { |piece| piece.value(con) }.uniq.length == puzzle.pieces.length
         end
       end
 
@@ -78,7 +78,7 @@ module Logigram
 
       def unique_constraints
         @unique_constraints ||= (puzzle.constraints - puzzle.determinants).select do |con|
-          puzzle.pieces.map { |piece| piece.value(con.name) }.uniq.length == puzzle.pieces.length
+          puzzle.pieces.map { |piece| piece.value(con) }.uniq.length == puzzle.pieces.length
         end
       end
 

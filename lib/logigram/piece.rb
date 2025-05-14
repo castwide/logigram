@@ -21,17 +21,26 @@ module Logigram
       object.to_s
     end
 
-    def property(key)
-      properties.find { |prop| prop.constraint.name == key }
+    # @param constraint [Constraint]
+    # @return [Property, nil]
+    def property(constraint)
+      constraint_property_hash[constraint]
     end
 
-    def value(key)
-      properties.find { |prop| prop.name == key }
-                &.value
+    # @param constraint [Constraint]
+    # @return [Object, nil]
+    def value(constraint)
+      constraint_property_hash[constraint]&.value
     end
 
     def to_s
       name
+    end
+
+    private
+
+    def constraint_property_hash
+      @constraint_property_hash ||= properties.map { |prop| [prop.constraint, prop] }.to_h
     end
   end
 end

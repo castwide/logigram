@@ -92,7 +92,7 @@ module Logigram
       # @return [Array<Property>]
       def validate(properties)
         check = properties.select { |prop| determinants.include?(prop.constraint) }
-        conflicts = check.select { |prop| prop.value == solution.value(prop.constraint.name) }
+        conflicts = check.select { |prop| prop.value == solution.value(prop.constraint) }
         return properties if conflicts.length < check.length
 
         replace properties, conflicts.sample
@@ -106,7 +106,7 @@ module Logigram
       def replace(properties, fix)
         update = properties - [fix]
         value = (fix.constraint.values - [fix.value]).sample
-        raise "Unable to select value for constraint '#{fix.constraint.name}'" unless value
+        raise "Unable to select value for constraint '#{fix.constraint}'" unless value
 
         update.push Property.new(fix.constraint, value)
         update

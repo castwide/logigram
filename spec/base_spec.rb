@@ -64,7 +64,7 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['dog', 'cat'])
-    expect(puzzle.solution.value('color')).to eq('blue')
+    expect(puzzle.solution.value(klass.constraint('color'))).to eq('blue')
   end
 
   it 'supports multiple determinants' do
@@ -84,9 +84,9 @@ RSpec.describe Logigram::Base do
     end
     # @type [Logigram::Base]
     puzzle = klass.new(['pencil', 'pen', 'crayon'])
-    answer = puzzle.solution.value('color')
+    answer = puzzle.solution.value(klass.constraint('color'))
     (puzzle.pieces - [puzzle.solution]).each do |piece|
-      expect(piece.value('color')).not_to eq(answer)
+      expect(piece.value(klass.constraint('color'))).not_to eq(answer)
     end
   end
 
@@ -100,7 +100,7 @@ RSpec.describe Logigram::Base do
     # if the solution piece is red, the other pieces will both be green.
     puzzle = klass.new(['pencil', 'pen', 'crayon'])
     solution = puzzle.solution.properties.first.value
-    matches = puzzle.pieces.select { |piece| piece.value('color') == solution }
+    matches = puzzle.pieces.select { |piece| piece.value(klass.constraint('color')) == solution }
     expect(matches).to be_one
     expect(puzzle.solution.properties.map(&:value)).to eq([solution])
   end

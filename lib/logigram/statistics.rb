@@ -12,8 +12,8 @@ module Logigram
       puzzle.constraints.map do |con|
         values = {}
         puzzle.pieces.each do |pc|
-          values[pc.value(con.name)] ||= 0
-          values[pc.value(con.name)] += 1
+          values[pc.value(con)] ||= 0
+          values[pc.value(con)] += 1
         end
         [con, values]
       end.to_h

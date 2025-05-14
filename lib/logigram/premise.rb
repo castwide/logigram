@@ -22,7 +22,7 @@ module Logigram
 
     # @return [Property]
     def property
-      piece.property(constraint.name)
+      piece.property(constraint)
     end
 
     def specific?
@@ -42,7 +42,7 @@ module Logigram
     end
 
     def subject
-      specific? ? piece.name : piece.property(identifier.name).subject
+      specific? ? piece.name : piece.property(identifier).subject
     end
 
     # A human-readable representation of the premise, e.g., "The dog is red."
@@ -50,7 +50,7 @@ module Logigram
     # @return [String]
     def text
       if affirmative?
-        "#{subject} #{piece.property(property.name).predicate}"
+        "#{subject} #{piece.property(property.constraint).predicate}"
       else
         "#{subject} #{property.constraint.negative(value)}"
       end
