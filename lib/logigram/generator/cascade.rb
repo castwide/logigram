@@ -87,15 +87,15 @@ module Logigram
       end
 
       def pick_random_unique_constraint
-        random_unique_constraints.replace(shuffle_unique_restraints) if random_unique_constraints.empty?
+        random_unique_constraints.replace(shuffle_unique_constraints) if random_unique_constraints.empty?
         random_unique_constraints.pop
       end
 
       def random_unique_constraints
-        @random_unique_constraints ||= shuffle_unique_restraints
+        @random_unique_constraints ||= shuffle_unique_constraints
       end
 
-      def shuffle_unique_restraints
+      def shuffle_unique_constraints
         (unique_constraints + unique_determinants).shuffle
       end
     end
