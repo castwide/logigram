@@ -29,7 +29,7 @@ challenge = Logigram::Challenge.new(puzzle, difficulty: :medium)
 
 puts "The suspects are #{puzzle.pieces.map(&:name).sort.join(', ')}"
 
-tables = Logigram::Datasets.constraint_tables(puzzle)
+tables = Logigram::Statistics.constraint_tables(puzzle)
 tables.each do |constraint, data|
   if data.values.all? { |cnt| cnt == 1 }
     puts "1 of each #{constraint.verb} #{data.keys.map { |val| constraint.descriptor(val) }.sort.join(', ')}"
