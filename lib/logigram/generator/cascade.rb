@@ -7,9 +7,7 @@ module Logigram
     class Cascade < Base
       attr_reader :difficulty
 
-      # @param difficulty [Symbol] :easy, :medium, or :hard
-      def initialize(puzzle, difficulty: :medium)
-        super(puzzle)
+      def configure(difficulty: :medium)
         @difficulty = difficulty
       end
 
