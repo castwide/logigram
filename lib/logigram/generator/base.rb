@@ -24,10 +24,8 @@ module Logigram
       end
 
       # @abstract
-      # @return [Array<Premise>]
-      def premises
-        raise 'not implemented'
-      end
+      # @!method premises
+      #   @return [Array<Premise>]
     end
   end
 end
