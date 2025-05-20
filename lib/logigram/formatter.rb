@@ -62,14 +62,16 @@ module Logigram
       value.to_s.sub(/^(a|an) /, '')
     end
 
-    # @return [String]
+    # @param verb [Symbol, Array<String>]
+    # @return [Array<String>]
     def normalize_verb(verb)
       CONJUGATIONS[verb] ||
         validate_conjugation(verb) ||
         raise(ArgumentError, 'Verb must be a predefined infinitive or an array of verb forms')
     end
 
-    # @param [String]
+    # @param [Object]
+    # @return [Array<String>, nil]
     def validate_conjugation(verb)
       verb if verb.is_a?(Array) && verb.length == 4
     end
