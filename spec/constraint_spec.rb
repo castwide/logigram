@@ -41,4 +41,25 @@ RSpec.describe Logigram::Constraint do
       expect(constraint.descriptor('red')).to eq('red-haired')
     end
   end
+
+  describe '#verb' do
+    let(:formatter) { Logigram::Formatter.new(verb: ['looks', 'look', 'does not look', 'do not look']) }
+    let(:constraint) { Logigram::Constraint.new('color', %w[red blue], formatter: formatter) }
+
+    it 'returns a single affirmative verb' do
+      expect(constraint.verb(1, true)).to eq('looks')
+    end
+
+    it 'returns a single negative verb' do
+      expect(constraint.verb(1, false)).to eq('does not look')
+    end
+
+    it 'returns a plural affirmative verb' do
+      expect(constraint.verb(2, true)).to eq('look')
+    end
+
+    it 'returns a plural negative verb' do
+      expect(constraint.verb(2, false)).to eq('do not look')
+    end
+  end
 end

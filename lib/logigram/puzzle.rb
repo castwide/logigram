@@ -37,7 +37,7 @@ module Logigram
     # @param object [Object] The object used to generate the piece
     # @return [Piece]
     def piece_for(object)
-      pieces.find { |piece| piece.object == object }
+      object_piece_map[object]
     end
 
     # @param name [String]
@@ -46,12 +46,20 @@ module Logigram
       constraints.find { |con| con.name == name }
     end
 
+    # An array of the puzzle's pieces excluding the solution.
+    #
     def herrings
       @herrings ||= pieces - [solution]
     end
 
-    def to_challenge(difficulty: :medium)
-      Challenge.new(self, difficulty: difficulty)
+    def to_challenge(**opts)
+      Challenge.new(self, **opts)
+    end
+
+    private
+
+    def object_piece_map
+      @object_piece_map ||= pieces.map { |piece| [piece.object, piece] }.to_h
     end
   end
 end
